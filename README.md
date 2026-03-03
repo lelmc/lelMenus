@@ -1,6 +1,6 @@
 # LelMenus - 乐联菜单插件
 
-一个基于 SpongeAPI 的菜单插件，支持动态命令注册、丰富的占位符系统和自定义 NBT 数据。
+一个基于 SpongeAPI12 的菜单插件，支持动态命令注册、丰富的占位符系统和自定义 NBT 数据。
 
 ## 📋 目录
 
@@ -65,17 +65,11 @@ rows = 3
 # 打开此菜单的命令 (可选，设置为 null 禁用)
 open_command = "main"
 
-# 是否注册该命令 (true/false)
-register_command = true
-
 # 菜单更新间隔 (秒)
 update_interval = 5
 
 # 菜单标题 (支持颜色代码和占位符)
 menu_title = "&c&l乐联&7-> &d服务菜单"
-
-# 是否启用甜味模式 (视觉效果)
-sweet = true
 ```
 
 ### 物品配置
@@ -171,9 +165,9 @@ items {
 
 ---
 
-### View Requirement - 视图要求系统
+### Requirements - 视图要求系统
 
-View Requirement 用于控制菜单项的显示条件，只有满足所有条件时才会显示该物品。
+Rquirements 用于控制菜单项的显示条件，只有满足所有条件时才会显示该物品。
 
 #### 配置格式
 
@@ -206,30 +200,8 @@ items {
 }
 ```
 
-**注意**: `requirements` 直接放在物品配置中，不需要 `view_requirement` 或 `right_click_requirement` 嵌套。
-
 ### 支持的比较类型
-数值比较：
 
-number > 或 number greater
-
-number >= 或 number greater or equals
-
-number < 或 number less
-
-number <= 或 number less or equals
-
-number equals
-
-字符串比较：
-
-string equals
-
-string contains
-
-string starts with
-
-string ends with
 #### 数值比较
 
 | 类型 | 别名 | 说明 | 示例 |
@@ -673,7 +645,6 @@ items {
 ### Q: 命令不工作怎么办？
 A: 检查以下几点：
 1. 确保配置文件中有 `open_command` 字段
-2. 确保 `register_command = true`
 3. 使用 `/menureload` 重新加载配置
 4. 检查权限 `lelmenu.use`
 
@@ -696,7 +667,3 @@ A: 检查 NBT 格式是否正确，确保数据类型匹配
 ## 支持与反馈
 
 如有问题或建议，请提交 Issue 或联系开发者。
-
-**版本**: 1.0.0  
-**作者**: LelMC Team  
-**许可**: MIT License
