@@ -1,6 +1,6 @@
-# LelMenus - 乐联菜单插件
+# LelMenus - lel箱子菜单插件
 
-一个基于 SpongeAPI12 的菜单插件，支持动态命令注册、丰富的占位符系统和自定义 NBT 数据。
+一个基于 SpongeAPI12 的箱子菜单插件，借鉴DeluxeMenus功能与格式、丰富的占位符系统和自定义 NBT 数据。
 
 ## 📋 目录
 
@@ -50,7 +50,7 @@
 - **条件显示**: 根据玩家状态动态显示/隐藏菜单项
 - **点击事件**: 支持左键、右键点击执行不同命令
 - **物品 NBT**: 支持自定义物品的 NBT 数据
-- **排行榜集成**: 支持经济系统财富排行榜
+- **miniPlaceholder占位符集成**: 支持经济系统占位符
 
 ---
 
@@ -62,10 +62,10 @@
 # 菜单行数 (1-6)
 rows = 3
 
-# 打开此菜单的命令 (可选，设置为 null 禁用)
+# 打开此菜单的命令 (可选，不需要可删除)
 open_command = "main"
 
-# 菜单更新间隔 (秒)
+# 菜单更新间隔 (秒) (可选，不需要可删除)
 update_interval = 5
 
 # 菜单标题 (支持颜色代码和占位符)
@@ -93,40 +93,29 @@ items {
     # 槽位编号
     slot = 10
     
-    # 物品数量
+    # 物品数量 (可选，不需要可删除)
     count = 1
     
-    # 附魔列表 (格式："附魔 ID;等级")
+    # 附魔列表 (格式："附魔 ID;等级") (可选，不需要可删除)
     enchantments = [
       "minecraft:binding_curse;1"
     ]
     
-    # 是否隐藏附魔
+    # 是否隐藏附魔 (可选，不需要可删除)
     hide_enchantments = true
     
-    # 左键点击执行的命令
+    # 左键点击执行的命令 (可选，不需要可删除)
     left_click_commands = [
       "[close]",
       "[player] warp zc"
     ]
     
-    # 右键点击执行的命令
+    # 右键点击执行的命令 (可选，不需要可删除)
     right_click_commands = [
       "[console] say Hello"
     ]
     
-    # 右键点击要求
-    right_click_requirement {
-      requirements {
-        "check_permission" {
-          type = "permission"
-          input = "%player_has_perm%"
-          output = "true"
-        }
-      }
-    }
-    
-    # 显示要求 (只有满足条件才显示)
+    # 显示要求 (只有满足条件才显示) (可选，不需要可删除)
     view_requirement {
       requirements {
         "check_level" {
@@ -137,10 +126,10 @@ items {
       }
     }
     
-    # 优先级 (数字越大越优先显示)
+    # 优先级 (数字越大越优先显示) (可选，不需要可删除)
     priority = 1
     
-    # NBT 数据 (见下方 NBT 格式说明)
+    # NBT 数据 (见下方 NBT 格式说明) (可选，不需要可删除)
     nbt_string {
       "CustomModelData" = "12345"
     }
