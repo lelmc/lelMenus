@@ -1,48 +1,47 @@
 name: 自动构建与发布
 
-# 1. 触发条件：每次推送到 main 分支或推送标签时运行
 on:
   push:
     branches:
-      - "**"  # 所有分支
-  pull_request:
-    branches:
-      - "**"
+      - main  # 只在推送到 main 分支时运行
+    tags:
+      - 'v*'  # 推送标签时也运行
 
 jobs:
   build-and-release:
-    # 2. 运行环境：使用最新的 Ubuntu 系统
     runs-on: ubuntu-latest
-    # 3. 权限设置：赋予写入权限，以便创建 Release
     permissions:
       contents: write
 
     steps:
-      # 4. 步骤 1：检出代码
       - name: 检出代码
         uses: actions/checkout@v4
 
-      # 5. 步骤 2：设置 Java 环境
       - name: 设置 Java 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      # 6. 步骤 3：设置 Gradle
       - name: 设置 Gradle
         uses: gradle/actions/setup-gradle@v4
-        
+
       - name: 使用 Gradle 构建
         run: gradle build --no-daemon
-        
-      # 7. 步骤 4：创建 Release (仅在推送标签时)
+
+      # 上传构建产物作为工作流 artifacts
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-jar
+          path: build/libs/*.jar
+
+      # 创建 Release (仅在推送标签时)
       - name: 创建 Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            build/libs/*.jar
+          files: build/libs/*.jar
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
