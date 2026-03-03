@@ -203,13 +203,13 @@ items {
 
 #### Numeric Comparisons
 
-| Type  | Description       | Example |
-|-------|-------------------|---------|
-| `=>`  | Greater than      | `input="<player_level>", output="10"` |
-| `=>=` | Greater or equals | `input="<player_exp_total>", output="100"` |
-| `=<`  | Less than         | `input="<player_health>", output="5"` |
-| `=<=` | Less or equals    | `input="<player_food>", output="20"` |
-| `==`  | Equals            | `input="<player_level>", output="50"` |
+| Type | Description       | Example |
+|-----|-------------------|---------|
+| `>` | Greater than      | `input="<player_level>", output="10"` |
+| `>=` | Greater or equals | `input="<player_exp_total>", output="100"` |
+| `<` | Less than         | `input="<player_health>", output="5"` |
+| `<=` | Less or equals    | `input="<player_food>", output="20"` |
+| `==` | Equals            | `input="<player_level>", output="50"` |
 
 #### String Comparisons
 

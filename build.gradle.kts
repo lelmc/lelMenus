@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "cn.lelmc"
-version = "1.0"
+version = "1.1"
 
 repositories {
     mavenCentral()
@@ -25,7 +25,7 @@ sponge {
     license("All-Rights-Reserved")
     loader {
         name(PluginLoaders.JAVA_PLAIN)
-        version("1.0")
+        version("1.1")
     }
     plugin("lelmenus") {
         displayName("lelMenus")
