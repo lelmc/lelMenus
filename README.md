@@ -491,91 +491,91 @@ nbt_form {
 ### 👤 Player 占位符 (玩家相关)
 
 #### 基本信息
-- `%player_uuid%` - 玩家 UUID
-- `%player_name%` - 玩家名字
-- `%player_prefix%` - 玩家前缀
-- `%player_suffix%` - 玩家后缀
+- `<player_uuid>` - 玩家 UUID
+- `<player_name>` - 玩家名字
+- `<player_prefix>` - 玩家前缀
+- `<player_suffix>` - 玩家后缀
 
 #### 位置和方向
-- `%player_world%` - 所在世界名称
-- `%player_x%` - X 坐标
-- `%player_y%` - Y 坐标
-- `%player_z%` - Z 坐标
-- `%player_direction%` - 面向方向 (南/西南/西/西北/北/东北/东/东南)
+- `<player_world>` - 所在世界名称
+- `<player_x>` - X 坐标
+- `<player_y>` - Y 坐标
+- `<player_z>` - Z 坐标
+- `<player_direction>` - 面向方向 (南/西南/西/西北/北/东北/东/东南)
 
 #### 状态信息
-- `%player_health%` - 生命值
-- `%player_max_health%` - 最大生命值
-- `%player_food%` - 饱食度
-- `%player_saturation%` - 饱和度
-- `%player_can_fly%` - 能否飞行
-- `%player_flying%` - 是否正在飞行
-- `%player_fly_speed%` - 飞行速度
-- `%player_walk_speed%` - 行走速度
+- `<player_health>` - 生命值
+- `<player_max_health>` - 最大生命值
+- `<player_food>` - 饱食度
+- `<player_saturation>` - 饱和度
+- `<player_can_fly>` - 能否飞行
+- `<player_flying>` - 是否正在飞行
+- `<player_fly_speed>` - 飞行速度
+- `<player_walk_speed>` - 行走速度
 
 #### 游戏信息
-- `%player_gamemode%` - 游戏模式
-- `%player_level%` - 经验等级
-- `%player_exp_total%` - 总经验值
-- `%player_exp%` - 当前等级经验
-- `%player_exp_to_next%` - 升级到下一级所需经验
-- `%player_ping%` - 网络延迟
-- `%player_language%` - 客户端语言
+- `<player_gamemode>` - 游戏模式
+- `<player_level>` - 经验等级
+- `<player_exp_total>` - 总经验值
+- `<player_exp>` - 当前等级经验
+- `<player_exp_to_next>` - 升级到下一级所需经验
+- `<player_ping>` - 网络延迟
+- `<player_language>` - 客户端语言
 
 #### 空气值
-- `%player_max_air%` - 最大空气值
-- `%player_remaining_air%` - 剩余空气值
+- `<player_max_air>` - 最大空气值
+- `<player_remaining_air>` - 剩余空气值
 
 #### 手持物品
-- `%player_item_in_main_hand%` - 主手物品名称
-- `%player_item_in_off_hand%` - 副手物品名称
+- `<player_item_in_main_hand>` - 主手物品名称
+- `<player_item_in_off_hand>` - 副手物品名称
 
 #### 时间统计
-- `%player_time_played_seconds%` - 游戏时间 (秒)
-- `%player_time_played_minutes%` - 游戏时间 (分钟)
-- `%player_time_played_hours%` - 游戏时间 (小时)
-- `%player_time_played_days%` - 游戏时间 (天)
-- `%player_time_played%` - 游戏时间 (格式化输出，如 "1 d 2 h 30 m")
-- `%player_first_join%` - 首次加入时间
+- `<player_time_played_seconds>` - 游戏时间 (秒)
+- `<player_time_played_minutes>` - 游戏时间 (分钟)
+- `<player_time_played_hours>` - 游戏时间 (小时)
+- `<player_time_played_days>` - 游戏时间 (天)
+- `<player_time_played>` - 游戏时间 (格式化输出，如 "1 d 2 h 30 m")
+- `<player_first_join>` - 首次加入时间
 
 ### 🖥️ Server 占位符 (服务器相关)
 
 #### 基本信息
-- `%server_online%` - 在线玩家数
-- `%server_max_players%` - 最大玩家数
-- `%server_unique_players%` - 唯一玩家数 (去重)
-- `%server_motd%` - 服务器描述 (MOTD)
+- `<server_online>` - 在线玩家数
+- `<server_max_players>` - 最大玩家数
+- `<server_unique_players>` - 唯一玩家数 (去重)
+- `<server_motd>` - 服务器描述 (MOTD)
 
 #### 性能信息
-- `%server_tps%` - 每秒刻数 (TPS)
-- `%server_ram_used%` - 已用内存 (MB)
-- `%server_ram_free%` - 可用内存 (MB)
-- `%server_ram_total%` - 总内存 (MB)
-- `%server_ram_max%` - 最大内存 (MB)
-- `%server_cores%` - CPU 核心数
+- `<server_tps>` - 每秒刻数 (TPS)
+- `<server_ram_used>` - 已用内存 (MB)
+- `<server_ram_free>` - 可用内存 (MB)
+- `<server_ram_total>` - 总内存 (MB)
+- `<server_ram_max>` - 最大内存 (MB)
+- `<server_cores>` - CPU 核心数
 
 #### 运行时间
-- `%server_uptime%` - 运行时间百分比
-- `%server_uptime_total%` - 总运行时间
-- `%server_time_world%` - 世界时间戳
+- `<server_uptime>` - 运行时间百分比
+- `<server_uptime_total>` - 总运行时间
+- `<server_time_world>` - 世界时间戳
 
 ### 💰 Economy 占位符 (经济系统)
 
 #### 个人经济
-- `%economy_balance%` - 玩家余额 (原始数值)
-- `%economy_balance_formatted%` - 格式化后的余额 (带货币符号)
-- `%economy_currency_name%` - 货币名称
-- `%economy_currency_symbol%` - 货币符号
+- `<economy_balance>` - 玩家余额 (原始数值)
+- `<economy_balance_formatted>` - 格式化后的余额 (带货币符号)
+- `<economy_currency_name>` - 货币名称
+- `<economy_currency_symbol>` - 货币符号
 
 #### 财富排行榜
-- `%economy_baltop_1%` ~ `%economy_baltop_5%` - 富豪榜前 5 名玩家名字
-- `%economy_baltop_1_balance%` ~ `%economy_baltop_5_balance%` - 富豪榜前 5 名玩家余额
+- `<economy_baltop_1>` ~ `<economy_baltop_5>` - 富豪榜前 5 名玩家名字
+- `<economy_baltop_1_balance>` ~ `<economy_baltop_5_balance>` - 富豪榜前 5 名玩家余额
 
 ### 📊 其他占位符
 
 #### 全局占位符
-- `%server_hello%` - 你好 (测试用)
-- `%server_server_name%` - 服务器名称 (自定义)
+- `<server_hello>` - 你好 (测试用)
+- `<server_server_name>` - 服务器名称 (自定义)
 
 ---
 
