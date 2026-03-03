@@ -56,7 +56,6 @@ public class NBTCommand {
             player.sendMessage(Component.text("你手中没有物品！", NamedTextColor.RED));
             return CommandResult.success();
         }
-
         // 获取输出格式（默认hocon）
         String format = context.one(formatParam.key()).orElse("hocon");
         // 获取物品的NBT信息
@@ -66,16 +65,6 @@ public class NBTCommand {
         String itemId = itemInHand.type().key(RegistryTypes.ITEM_TYPE).asString();
         int amount = itemInHand.quantity();
 
-        /*ItemType value = ItemTypes.registry().value(ResourceKey.resolve("cobblemon:pokemon_model"));
-        ItemStack itemStack = ItemStack.of(value);
-        // 1. 先获取或创建 components 视图
-        DataContainer dataContainer = itemStack.toContainer();
-        DataView components = dataContainer.createView(DataQuery.of("components"));
-        DataView pokemonItem = components.createView(DataQuery.of("cobblemon:pokemon_item"));
-        pokemonItem.set(DataQuery.of("species"), "cobblemon:bulbasaur");
-        pokemonItem.set(DataQuery.of("aspects"), List.of());
-        ItemStack build = ItemStack.builder().fromContainer(dataContainer).build();
-        player.inventory().offer(build);*/
         // 构建输出
         StringBuilder output = new StringBuilder();
         output.append("# 物品信息\n");

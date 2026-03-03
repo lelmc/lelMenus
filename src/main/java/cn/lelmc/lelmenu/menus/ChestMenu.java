@@ -1,5 +1,6 @@
 package cn.lelmc.lelmenu.menus;
 
+import cn.lelmc.lelmenu.Lelmenus;
 import cn.lelmc.lelmenu.utils.ColorUtils;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
@@ -20,25 +21,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class ChestMenu {
-
     private static final Map<UUID, ChestMenu> openMenus = new HashMap<>();
-    private static PluginContainer plugin;
-
-    private final Component title;
     private final int rows;  // 行数
+    private final Component title;
     private final Map<Integer, ItemStack> items = new HashMap<>();
     private final Map<Integer, Consumer<ClickType<?>>> clickActions = new HashMap<>();
-    private int updateInterval = 0;
     private String menuName;
+    private int updateInterval = 0;
     private ScheduledTask updateTask;
 
     public ChestMenu(String title, int rows) {
         this.title = ColorUtils.toComponent(title);
         this.rows = rows;
-    }
-
-    public static void setPlugin(PluginContainer pluginContainer) {
-        plugin = pluginContainer;
     }
 
     public static void closeMenu(ServerPlayer player) {
@@ -55,6 +49,21 @@ public class ChestMenu {
 
     public static ChestMenu getOpenMenu(ServerPlayer player) {
         return openMenus.get(player.uniqueId());
+    }
+
+    public static void refreshMenu(ServerPlayer player, String menuName) {
+        ChestMenu newMenu = Lelmenus
+                .instance
+                .menuLoader
+                .loadMenu(menuName, player);
+        if (newMenu != null) {
+            player.closeInventory();
+            newMenu.open(player);
+        }
+    }
+
+    public String getMenuName() {
+        return menuName;
     }
 
     public void setMenuName(String menuName) {
@@ -75,14 +84,12 @@ public class ChestMenu {
 
     public void open(ServerPlayer player) {
         try {
-            // 根据行数选择容器类型
             ContainerType containerType = getContainerTypeForRows(rows);
-
             ViewableInventory inventory = ViewableInventory.builder()
                     .type(containerType)
                     .completeStructure()
                     .carrier(player)
-                    .plugin(plugin)
+                    .plugin(Lelmenus.instance.container)
                     .build();
 
             InventoryMenu menu = inventory.asMenu();
@@ -97,7 +104,7 @@ public class ChestMenu {
             });
 
             // 注册点击处理器
-            menu.registerSlotClick(new MenuClickHandler(plugin, menu, inventory, player, clickActions));
+            menu.registerSlotClick(new MenuClickHandler(Lelmenus.instance.container, menu, inventory, player, clickActions));
 
             // 打开菜单
             menu.open(player);
@@ -109,22 +116,15 @@ public class ChestMenu {
             }
 
         } catch (Exception e) {
-            plugin.logger().error("无法打开菜单: {}", menuName, e);
+            Lelmenus.instance.logger.error("无法打开菜单: {}", menuName, e);
         }
     }
 
     private void startUpdateTask(ServerPlayer player) {
-        updateTask = Sponge.server().scheduler().executor(plugin)
+        updateTask = Sponge.server().scheduler().executor(Lelmenus.instance.container)
                 .scheduleAtFixedRate(() -> {
                     if (player.isOnline() && openMenus.containsKey(player.uniqueId())) {
-                        // 重新加载菜单并刷新
-                        MenuLoader loader = new MenuLoader(new ConfigManager(plugin));
-                        ChestMenu newMenu = loader.loadMenu(menuName, player);
-                        if (newMenu != null) {
-                            // 刷新当前菜单
-                            player.closeInventory();
-                            newMenu.open(player);
-                        }
+                        refreshMenu(player, menuName);
                     } else {
                         // 如果玩家不在线或菜单已关闭，停止任务
                         if (updateTask != null) {

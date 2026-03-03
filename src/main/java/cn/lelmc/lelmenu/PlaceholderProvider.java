@@ -84,7 +84,7 @@ public class PlaceholderProvider {
 
                 // 网络信息
                 .audiencePlaceholder(ServerPlayer.class, "ping", (p, ctx, queue) ->
-                        createTag(String.valueOf(0)))
+                        createTag(String.valueOf(p.connectionState().latency())))
                 .audiencePlaceholder(ServerPlayer.class, "language", (p, ctx, queue) ->
                         createTag(p.locale().getDisplayName()))
 
@@ -381,10 +381,6 @@ public class PlaceholderProvider {
         return "未知";
     }
 
-    private enum TimeUnit {
-        SECONDS, MINUTES, HOURS, DAYS
-    }
-
     private static long getTime(ServerPlayer p, TimeUnit unit, boolean raw) {
         // 尝试通过统计信息获取游戏时间
         var stats = p.statistics();
@@ -404,8 +400,6 @@ public class PlaceholderProvider {
             case DAYS -> seconds / 86400;
         };
     }
-
-
 
     private static String formatTime(ServerPlayer p) {
         long totalSeconds = getTime(p, TimeUnit.SECONDS, false);
@@ -438,5 +432,9 @@ public class PlaceholderProvider {
     private static String getDisplayName(Component component) {
         LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacySection();
         return legacySerializer.serialize(component);
+    }
+
+    private enum TimeUnit {
+        SECONDS, MINUTES, HOURS, DAYS
     }
 }

@@ -2,7 +2,7 @@ package cn.lelmc.lelmenu.menus;
 
 import cn.lelmc.lelmenu.Lelmenus;
 import cn.lelmc.lelmenu.utils.ColorUtils;
-import cn.lelmc.lelmenu.utils.PlaceholderUtil;
+import cn.lelmc.lelmenu.utils.Placeholder;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -17,14 +17,13 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.configurate.ConfigurationNode;
 
 import java.util.*;
 
-public record MenuLoader(ConfigManager configManager) {
+public  record MenuLoader(ConfigManager configManager) {
 
     public ChestMenu loadMenu(String menuName, ServerPlayer player) {
         MenuConfig config = configManager.getMenu(menuName);
@@ -86,12 +85,12 @@ public record MenuLoader(ConfigManager configManager) {
                     // 左键或Shift+左键
                     if (clickType.equals(ClickTypes.CLICK_LEFT.get()) ||
                             clickType.equals(ClickTypes.SHIFT_CLICK_LEFT.get())) {
-                        handleCommands(itemConfig.getLeftClickCommands(), player, clickType);
+                        handleCommands(itemConfig.getLeftClickCommands(), player);
                     }
                     // 右键或Shift+右键
                     else if (clickType.equals(ClickTypes.CLICK_RIGHT.get()) ||
                             clickType.equals(ClickTypes.SHIFT_CLICK_RIGHT.get())) {
-                        handleCommands(itemConfig.getRightClickCommands(), player, clickType);
+                        handleCommands(itemConfig.getRightClickCommands(), player);
                     }
                 });
             }
@@ -121,7 +120,7 @@ public record MenuLoader(ConfigManager configManager) {
             // 处理简单的 nbtString
             if (config.getNbtString() != null) {
                 for (Map.Entry<String, String> entry : config.getNbtString().entrySet()) {
-                    String value = PlaceholderUtil.parsePlaceholdersToString(entry.getValue(), player);
+                    String value = Placeholder.parseString(entry.getValue(), player);
                     dataView.set(DataQuery.of(entry.getKey()), value);
                 }
             }
@@ -161,7 +160,7 @@ public record MenuLoader(ConfigManager configManager) {
                             if (propertyNode.isList()) {
                                 List<String> list = new ArrayList<>();
                                 for (ConfigurationNode item : propertyNode.childrenList()) {
-                                    String s = PlaceholderUtil.parsePlaceholdersToString(item.getString(""), player);
+                                    String s = Placeholder.parseString(item.getString(""), player);
                                     list.add(s);
                                 }
                                 componentView.set(DataQuery.of(propertyKey), list);
@@ -182,14 +181,14 @@ public record MenuLoader(ConfigManager configManager) {
                     .build();
 
             // 解析显示名称
-            String displayName = PlaceholderUtil.parsePlaceholdersToString(config.getDisplayName(), player);
+            String displayName = Placeholder.parseString(config.getDisplayName(), player);
             Component displayComponent = ColorUtils.toComponent(displayName);
             stack.offer(Keys.CUSTOM_NAME, displayComponent);
 
             // 解析lore
             List<String> loreList = new ArrayList<>();
             for (String line : config.getLore()) {
-                loreList.add(PlaceholderUtil.parsePlaceholdersToString(line, player));
+                loreList.add(Placeholder.parseString(line, player));
             }
             String[] loreArray = loreList.toArray(new String[0]);
             if (loreArray.length > 0) {
@@ -255,6 +254,7 @@ public record MenuLoader(ConfigManager configManager) {
     // 检查视图要求
     private boolean checkViewRequirement(MenuConfig.MenuItemConfig config, ServerPlayer player) {
         Map<String, Map<String, String>> requirements = config.getRequirements();
+        // 如果没有配置条件，直接显示
         if (requirements == null || requirements.isEmpty()) {
             return true;
         }
@@ -268,21 +268,18 @@ public record MenuLoader(ConfigManager configManager) {
             String output = conditionData.get("output");
 
             // 解析占位符
-            String inputStr = PlaceholderUtil.parsePlaceholdersToString(input, player);
-            String outputStr = PlaceholderUtil.parsePlaceholdersToString(output, player);
+            String inputStr = Placeholder.parseString(input, player);
+            String outputStr = Placeholder.parseString(output, player);
 
             // 根据条件类型进行判断
             switch (type) {
                 // 字符串相等判断
-                case "string equals":
+                case "equals":
                     if (!inputStr.equals(outputStr)) {
                         return false;
                     }
                     break;
-
-                // 数值大于判断
-                case "number >":
-                case "number greater":
+                case ">":
                     try {
                         double inputNum = Double.parseDouble(inputStr);
                         double outputNum = Double.parseDouble(outputStr);
@@ -293,10 +290,7 @@ public record MenuLoader(ConfigManager configManager) {
                         return false;
                     }
                     break;
-
-                // 数值大于等于判断
-                case "number >=":
-                case "number greater or equals":
+                case ">=":
                     try {
                         double inputNum = Double.parseDouble(inputStr);
                         double outputNum = Double.parseDouble(outputStr);
@@ -307,10 +301,7 @@ public record MenuLoader(ConfigManager configManager) {
                         return false;
                     }
                     break;
-
-                // 数值小于判断
-                case "number <":
-                case "number less":
+                case "<":
                     try {
                         double inputNum = Double.parseDouble(inputStr);
                         double outputNum = Double.parseDouble(outputStr);
@@ -321,10 +312,7 @@ public record MenuLoader(ConfigManager configManager) {
                         return false;
                     }
                     break;
-
-                // 数值小于等于判断
-                case "number <=":
-                case "number less or equals":
+                case "<=":
                     try {
                         double inputNum = Double.parseDouble(inputStr);
                         double outputNum = Double.parseDouble(outputStr);
@@ -335,9 +323,7 @@ public record MenuLoader(ConfigManager configManager) {
                         return false;
                     }
                     break;
-
-                // 数值相等判断
-                case "number equals":
+                case "==":
                     try {
                         double inputNum = Double.parseDouble(inputStr);
                         double outputNum = Double.parseDouble(outputStr);
@@ -350,27 +336,26 @@ public record MenuLoader(ConfigManager configManager) {
                     break;
 
                 // 字符串包含判断
-                case "string contains":
+                case "contains":
                     if (!inputStr.contains(outputStr)) {
                         return false;
                     }
                     break;
 
                 // 字符串开头判断
-                case "string starts with":
+                case "starts with":
                     if (!inputStr.startsWith(outputStr)) {
                         return false;
                     }
                     break;
 
                 // 字符串结尾判断
-                case "string ends with":
+                case "ends with":
                     if (!inputStr.endsWith(outputStr)) {
                         return false;
                     }
                     break;
 
-                // 未知条件类型
                 default:
                     Lelmenus.instance.logger.warn("未知的条件类型 [{}]: {}", conditionName, type);
                     break;
@@ -393,21 +378,24 @@ public record MenuLoader(ConfigManager configManager) {
 
 
     // 处理命令
-    private void handleCommands(List<String> commands, ServerPlayer player, ClickType<?> clickType) {
+    private void handleCommands(List<String> commands, ServerPlayer player) {
         for (String command : commands) {
-            if (command.startsWith("[close]")) {
+            if (command.startsWith("[refresh]")) {
+                String menuName = ChestMenu.getOpenMenu(player).getMenuName();
+                ChestMenu.refreshMenu(player, menuName);
+            } else if (command.startsWith("[close]")) {
                 ChestMenu.closeMenu(player);
             } else if (command.startsWith("[player]")) {
                 String cmd = command.substring(8).trim();
-                cmd = PlaceholderUtil.parsePlaceholdersToString(cmd, player);
+                cmd = Placeholder.parseString(cmd, player);
                 executeCommand(player, cmd);
             } else if (command.startsWith("[console]")) {
                 String cmd = command.substring(9).trim();
-                cmd = PlaceholderUtil.parsePlaceholdersToString(cmd, player);
+                cmd = Placeholder.parseString(cmd, player);
                 executeConsoleCommand(cmd);
             } else if (command.startsWith("[message]")) {
                 String msg = command.substring(9).trim();
-                player.sendMessage(PlaceholderUtil.parsePlaceholders(msg, player));
+                player.sendMessage(Component.text(Placeholder.parseString(msg, player)));
             }
         }
     }

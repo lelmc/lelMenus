@@ -128,7 +128,7 @@ items {
     view_requirement {
       requirements {
         "check_level" {
-          type = "number >="
+          type = ">="
           input = "%player_level%"
           output = "10"
         }
@@ -157,6 +157,7 @@ items {
 ### Special Command Formats
 
 - `[close]` - Close menu
+- `[refresh]` - Refresh the current menu
 - `[player] command` - Execute command as player
 - `[console] command` - Execute command as console
 - `[message] message` - Send message to player
@@ -189,7 +190,7 @@ items {
     # Add requirements directly in item configuration
     requirements {
       "level_check" {
-        type = "number >="
+        type = ">="
         input = "<player_level>"
         output = "10"
       }
@@ -202,22 +203,22 @@ items {
 
 #### Numeric Comparisons
 
-| Type | Alias | Description | Example |
-|------|-------|-------------|---------|
-| `number >` | `number greater` | Greater than | `input="<player_level>", output="10"` |
-| `number >=` | `number greater or equals` | Greater or equals | `input="<player_exp_total>", output="100"` |
-| `number <` | `number less` | Less than | `input="<player_health>", output="5"` |
-| `number <=` | `number less or equals` | Less or equals | `input="<player_food>", output="20"` |
-| `number equals` | - | Equals | `input="<player_level>", output="50"` |
+| Type  | Description       | Example |
+|-------|-------------------|---------|
+| `=>`  | Greater than      | `input="<player_level>", output="10"` |
+| `=>=` | Greater or equals | `input="<player_exp_total>", output="100"` |
+| `=<`  | Less than         | `input="<player_health>", output="5"` |
+| `=<=` | Less or equals    | `input="<player_food>", output="20"` |
+| `==`  | Equals            | `input="<player_level>", output="50"` |
 
 #### String Comparisons
 
 | Type | Description | Example |
 |------|-------------|---------|
-| `string equals` | String equals | `input="<player_world>", output="world"` |
-| `string contains` | String contains | `input="<player_name>", output="admin"` |
-| `string starts with` | String starts with | `input="<player_uuid>", output="abc"` |
-| `string ends with` | String ends with | `input="<player_uuid>", output="123"` |
+| `equals` | String equals | `input="<player_world>", output="world"` |
+| `contains` | String contains | `input="<player_name>", output="admin"` |
+| `starts with` | String starts with | `input="<player_uuid>", output="abc"` |
+| `ends with` | String ends with | `input="<player_uuid>", output="123"` |
 
 ### Configuration Examples
 
@@ -229,7 +230,7 @@ items {
     # Add requirements directly in item configuration
     requirements {
       "level_check" {
-        type = "number >="
+        type = ">="
         input = "<player_level>"
         output = "10"
       }
@@ -246,7 +247,7 @@ items {
     material = "diamond_sword"
     requirements {
       "health_check" {
-        type = "number >"
+        type = ">"
         input = "<player_health>"
         output = "5"
       }
@@ -263,7 +264,7 @@ items {
     material = "grass_block"
     requirements {
       "world_check" {
-        type = "string equals"
+        type = "equals"
         input = "<player_world>"
         output = "world"
       }
@@ -280,7 +281,7 @@ items {
     material = "beacon"
     requirements {
       "level_check" {
-        type = "number >="
+        type = ">="
         input = "<player_level>"
         output = "10"
       }
@@ -309,7 +310,7 @@ items {
     # Right click also needs to meet conditions
     requirements {
       "permission_check" {
-        type = "string equals"
+        type = "equals"
         input = "<player_has_perm_lelmenu_admin>"
         output = "true"
       }

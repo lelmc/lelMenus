@@ -1,15 +1,15 @@
 package cn.lelmc.lelmenu.menus;
 
+import cn.lelmc.lelmenu.Lelmenus;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -18,51 +18,57 @@ import java.util.stream.Stream;
 
 public class ConfigManager {
 
-    private final Path configDir;
-    private final PluginContainer plugin;
     public final Map<String, MenuConfig> menus = new HashMap<>();
+    Logger logger = Lelmenus.instance.logger;
+    Path configDir = Lelmenus.instance.configDir;
     private ObjectMapper<MenuConfig> mapper;
 
-    public ConfigManager(PluginContainer plugin) {
-        this.plugin = plugin;
-        this.configDir = Paths.get("config", plugin.metadata().id());
-
+    public ConfigManager() {
         try {
-            // 创建ObjectMapper实例
             this.mapper = ObjectMapper.factory().get(MenuConfig.class);
         } catch (ConfigurateException e) {
-            plugin.logger().error("Unable to create object mapper", e);
+            logger.error("Unable to create object mapper", e);
         }
+    }
+
+    private static MenuConfig.MenuItemConfig getMenuItemConfig() {
+        MenuConfig.MenuItemConfig spawnItem = new MenuConfig.MenuItemConfig();
+        spawnItem.setMaterial("beacon");
+        spawnItem.setCount(10);
+        spawnItem.setDisplayName("&ctest");
+        spawnItem.setLore(Arrays.asList(
+                "&9Add lore here",
+                "&7Can be multiple lines"
+        ));
+        spawnItem.setSlot(10);
+        spawnItem.setHideEnchantments(true);
+        spawnItem.setEnchantments(List.of("minecraft:binding_curse;1"));
+        spawnItem.setLeftClickCommands(Arrays.asList(
+                "[close]",
+                "[player] warp zc"
+        ));
+        return spawnItem;
     }
 
     public void createDefaultConfigsIfNotExists() {
         Path configFile = configDir.resolve("main.conf");
         if (!Files.exists(configFile)) {
             createDefaultConfigs();
-            plugin.logger().info("Create default menu file: main.conf");
+            logger.info("Create default menu file: main.conf");
         }
     }
 
     // 加载所有菜单配置
     public void loadMenus() {
-        try {
-            // 创建配置目录
-            if (!Files.exists(configDir)) {
-                Files.createDirectories(configDir);
-            }
-
-            // 加载所有 .conf 文件
-            try (Stream<Path> pathStream = Files.list(configDir)) {
-                pathStream
-                        .filter(path -> path.toString().endsWith(".conf"))
-                        .forEach(this::loadMenu);
-            } catch (IOException e) {
-                plugin.logger().error("Unable to read menu directory", e);
-            }
-
+        // 加载所有 .conf 文件
+        try (Stream<Path> pathStream = Files.list(configDir)) {
+            pathStream
+                    .filter(path -> path.toString().endsWith(".conf"))
+                    .forEach(this::loadMenu);
         } catch (IOException e) {
-            plugin.logger().error("Unable to read menu directory", e);
+            logger.error("Unable to read menu directory", e);
         }
+
     }
 
     // 加载单个菜单配置
@@ -81,7 +87,7 @@ public class ConfigManager {
 
             menus.put(menuName, menuConfig);
         } catch (ConfigurateException e) {
-            plugin.logger().error("Unable to load menu file: {}", configFile, e);
+            logger.error("Unable to load menu file: {}", configFile, e);
         }
     }
 
@@ -104,7 +110,7 @@ public class ConfigManager {
             menus.put(menuName, menuConfig);
 
         } catch (ConfigurateException e) {
-            plugin.logger().error("Unable to save the menu file: {}", menuName, e);
+            logger.error("Unable to save the menu file: {}", menuName, e);
         }
     }
 
@@ -134,25 +140,6 @@ public class ConfigManager {
 
         mainMenu.setItems(items);
         saveMenu("main", mainMenu);
-    }
-
-    private static MenuConfig.MenuItemConfig getMenuItemConfig() {
-        MenuConfig.MenuItemConfig spawnItem = new MenuConfig.MenuItemConfig();
-        spawnItem.setMaterial("beacon");
-        spawnItem.setCount(10);
-        spawnItem.setDisplayName("&ctest");
-        spawnItem.setLore(Arrays.asList(
-                "&9Add lore here",
-                "&7Can be multiple lines"
-        ));
-        spawnItem.setSlot(10);
-        spawnItem.setHideEnchantments(true);
-        spawnItem.setEnchantments(List.of("minecraft:binding_curse;1"));
-        spawnItem.setLeftClickCommands(Arrays.asList(
-                "[close]",
-                "[player] warp zc"
-        ));
-        return spawnItem;
     }
 
     // 获取菜单配置
