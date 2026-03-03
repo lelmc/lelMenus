@@ -29,12 +29,12 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # 6. 步骤 3：使用 Gradle Wrapper 构建项目
-      - name: 授予 Gradle 执行权限
-        run: chmod +x gradlew
+      # 6. 步骤 3：设置 Gradle
+      - name: 设置 Gradle
+        uses: gradle/actions/setup-gradle@v4
         
       - name: 使用 Gradle 构建
-        run: ./gradlew build --no-daemon
+        run: gradle build --no-daemon
         
       # 7. 步骤 4：创建 Release (仅在推送标签时)
       - name: 创建 Release
