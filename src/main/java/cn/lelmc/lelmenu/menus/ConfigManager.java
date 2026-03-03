@@ -31,7 +31,7 @@ public class ConfigManager {
             // 创建ObjectMapper实例
             this.mapper = ObjectMapper.factory().get(MenuConfig.class);
         } catch (ConfigurateException e) {
-            plugin.logger().error("无法创建对象映射器", e);
+            plugin.logger().error("Unable to create object mapper", e);
         }
     }
 
@@ -39,7 +39,7 @@ public class ConfigManager {
         Path configFile = configDir.resolve("main.conf");
         if (!Files.exists(configFile)) {
             createDefaultConfigs();
-            plugin.logger().info("创建默认配置文件: main.conf");
+            plugin.logger().info("Create default menu file: main.conf");
         }
     }
 
@@ -57,11 +57,11 @@ public class ConfigManager {
                         .filter(path -> path.toString().endsWith(".conf"))
                         .forEach(this::loadMenu);
             } catch (IOException e) {
-                plugin.logger().error("无法读取配置目录", e);
+                plugin.logger().error("Unable to read menu directory", e);
             }
 
         } catch (IOException e) {
-            plugin.logger().error("无法读取配置目录", e);
+            plugin.logger().error("Unable to read menu directory", e);
         }
     }
 
@@ -81,7 +81,7 @@ public class ConfigManager {
 
             menus.put(menuName, menuConfig);
         } catch (ConfigurateException e) {
-            plugin.logger().error("无法加载配置文件: {}", configFile, e);
+            plugin.logger().error("Unable to load menu file: {}", configFile, e);
         }
     }
 
@@ -104,7 +104,7 @@ public class ConfigManager {
             menus.put(menuName, menuConfig);
 
         } catch (ConfigurateException e) {
-            plugin.logger().error("无法保存配置文件: {}", menuName, e);
+            plugin.logger().error("Unable to save the menu file: {}", menuName, e);
         }
     }
 
@@ -112,7 +112,7 @@ public class ConfigManager {
     public void createDefaultConfigs() {
         // 创建主菜单配置
         MenuConfig mainMenu = new MenuConfig();
-        mainMenu.setMenuTitle("&c&l菜单&7-> &d箱子菜单");
+        mainMenu.setMenuTitle("&c&lHello&7-> <player_name> &dThis is the default title");
         mainMenu.setOpenCommand("cd");
         mainMenu.setRows(6);
 
@@ -123,7 +123,7 @@ public class ConfigManager {
 
         MenuConfig.MenuItemConfig backgroundItem = new MenuConfig.MenuItemConfig();
         backgroundItem.setMaterial("white_stained_glass_pane");
-        backgroundItem.setDisplayName("&7欢迎使用");
+        backgroundItem.setDisplayName("&7Welcome");
         backgroundItem.setCount(1);
         backgroundItem.setSlots(Arrays.asList(
                 1, 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 23, 24, 25
@@ -142,8 +142,8 @@ public class ConfigManager {
         spawnItem.setCount(10);
         spawnItem.setDisplayName("&ctest");
         spawnItem.setLore(Arrays.asList(
-                "&9这里添加描述信息",
-                "&7可以多行"
+                "&9Add lore here",
+                "&7Can be multiple lines"
         ));
         spawnItem.setSlot(10);
         spawnItem.setHideEnchantments(true);

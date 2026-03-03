@@ -53,10 +53,10 @@ public class MenusCommand {
                         if (menu != null) {
                             menu.open(player);
                         } else {
-                            player.sendMessage(Component.text("菜单不存在: " + menuName, NamedTextColor.RED));
+                            player.sendMessage(Component.text("Menu does not exist: " + menuName, NamedTextColor.RED));
                         }
                     } else {
-                        ctx.sendMessage(Identity.nil(), Component.text("只能玩家使用此命令", NamedTextColor.RED));
+                        ctx.sendMessage(Identity.nil(), Component.text("Only players can use this command", NamedTextColor.RED));
                     }
                     return CommandResult.success();
                 })
@@ -84,10 +84,10 @@ public class MenusCommand {
                             if (menu != null) {
                                 menu.open(player);
                             } else {
-                                player.sendMessage(Component.text("菜单不存在: " + menuName, NamedTextColor.RED));
+                                player.sendMessage(Component.text("Menu does not exist: " + menuName, NamedTextColor.RED));
                             }
                         } else {
-                            ctx.sendMessage(Identity.nil(), Component.text("只能玩家使用此命令", NamedTextColor.RED));
+                            ctx.sendMessage(Identity.nil(), Component.text("Only players can use this command", NamedTextColor.RED));
                         }
                         return CommandResult.success();
                     })
@@ -103,7 +103,7 @@ public class MenusCommand {
         Map<String, String> newCommandMapping = lelmenus.menuLoader.getRegisteredCommands();
 
         // 发送重载成功消息
-        ctx.sendMessage(Identity.nil(), Component.text("配置已重载!", NamedTextColor.GREEN));
+        ctx.sendMessage(Identity.nil(), Component.text("Menu has been successfully reloaded!", NamedTextColor.GREEN));
 
         // 更新内部映射
         this.currentCommandMapping = new HashMap<>(newCommandMapping);

@@ -1,121 +1,130 @@
-# LelMenus - lel箱子菜单插件
+# LelMenus - lel Chest Menu Plugin
 
-一个基于 SpongeAPI12 的箱子菜单插件，借鉴DeluxeMenus功能与格式、丰富的占位符系统和自定义 NBT 数据。
-
-## 📋 目录
-
-- [命令](#命令)
-- [功能特性](#功能特性)
-- [配置文件格式](#配置文件格式)
-- [支持的 NBT 格式](#支持的 nbt 格式)
-- [支持的 MiniPlaceholders](#支持的 miniplaceholders)
+A chest menu plugin based on SpongeAPI 12, inspired by DeluxeMenus functionality and format, with rich placeholder system and custom NBT data support.
 
 ---
 
-## 命令
+## 🌏 Language / 语言
 
-### `/menu [菜单名]`
-- **权限**: `lelmenu.use`
-- **描述**: 打开指定的菜单
-- **用法**: 
-  - `/menu` - 打开主菜单
-  - `/menu shop` - 打开商店菜单
+- **[🇨🇳 中文版 README](README-Zh_CN.md)** - 中文说明文档
+- **[🇬🇧 English README](README.md)** - You are here
+
+---
+
+## 📋 Table of Contents
+
+- [Commands](#commands)
+- [Features](#features)
+- [Configuration Format](#configuration-format)
+- [Supported NBT Formats](#supported-nbt-formats)
+- [Supported MiniPlaceholders](#supported-miniplaceholders)
+
+---
+
+## Commands
+
+### `/menu [menu_name]`
+- **Permission**: `lelmenu.use`
+- **Description**: Open a specific menu
+- **Usage**: 
+  - `/menu` - Open main menu
+  - `/menu shop` - Open shop menu
 
 ### `/menureload`
-- **权限**: `lelmenu.reload`
-- **描述**: 重新加载所有菜单配置并刷新命令映射
-- **用法**: `/menureload`
+- **Permission**: `lelmenu.reload`
+- **Description**: Reload all menu configurations and refresh command mappings
+- **Usage**: `/menureload`
 
-### 动态菜单命令
-- **权限**: `lelmenu.use`
-- **描述**: 通过配置文件中的 `open_command` 自动注册的快捷命令
-- **示例**: 
-  - 配置文件中设置 `open_command = "cd"` → 可使用 `/cd` 打开对应菜单
-  - 配置文件中设置 `open_command = "shop"` → 可使用 `/shop` 打开对应菜单
-
----
-
-## 功能特性
-
-### ✨ 核心功能
-- **动态命令注册**: 根据配置文件自动注册菜单打开命令
-- **热重载支持**: 使用 `/menureload` 无需重启服务器即可更新配置
-- **丰富的占位符系统**: 支持玩家信息、服务器状态、经济系统等
-- **NBT 数据支持**: 支持多种 NBT 数据类型和复杂结构
-- **物品要求检测**: 支持检查玩家物品数量、类型等
-- **权限控制**: 每个菜单项都可以设置独立的权限要求
-
-### 🔧 高级功能
-- **多菜单支持**: 可以创建多个不同的菜单文件
-- **条件显示**: 根据玩家状态动态显示/隐藏菜单项
-- **点击事件**: 支持左键、右键点击执行不同命令
-- **物品 NBT**: 支持自定义物品的 NBT 数据
-- **miniPlaceholder占位符集成**: 支持经济系统占位符
+### Dynamic Menu Commands
+- **Permission**: `lelmenu.use`
+- **Description**: Shortcut commands automatically registered from `open_command` in configuration files
+- **Examples**: 
+  - Set `open_command = "cd"` in config → Use `/cd` to open corresponding menu
+  - Set `open_command = "shop"` in config → Use `/shop` to open corresponding menu
 
 ---
 
-## 配置文件格式
+## Features
 
-### 基础配置
+### ✨ Core Features
+- **Dynamic Command Registration**: Automatically register menu opening commands based on configuration
+- **Hot Reload Support**: Update configurations without restarting server using `/menureload`
+- **Rich Placeholder System**: Support for player info, server status, economy systems, etc.
+- **NBT Data Support**: Multiple NBT data types and complex structures
+- **Item Requirement Detection**: Check player item quantity, type, etc.
+- **Permission Control**: Each menu item can have independent permission requirements
+
+### 🔧 Advanced Features
+- **Multi-Menu Support**: Create multiple different menu files
+- **Conditional Display**: Dynamically show/hide menu items based on player state
+- **Click Events**: Support different commands for left-click and right-click
+- **Item NBT**: Custom NBT data for items
+- **MiniPlaceholders Integration**: Support for economy system placeholders
+
+---
+
+## Configuration Format
+
+### Basic Configuration
 
 ```hocon
-# 菜单行数 (1-6)
+# Menu rows (1-6)
 rows = 3
 
-# 打开此菜单的命令 (可选，不需要可删除)
+# Command to open this menu (optional, delete if not needed)
 open_command = "main"
 
-# 菜单更新间隔 (秒) (可选，不需要可删除)
+# Menu update interval in seconds (optional, delete if not needed)
 update_interval = 5
 
-# 菜单标题 (支持颜色代码和占位符)
-menu_title = "&c&l乐联&7-> &d服务菜单"
+# Menu title (supports color codes and placeholders)
+menu_title = "&c&lLel&7-> &dService Menu"
 ```
 
-### 物品配置
+### Item Configuration
 
 ```hocon
 items {
-  # 单个槽位配置
+  # Single slot configuration
   "10" {
-    # 物品材质 (支持 Minecraft ID)
+    # Item material (supports Minecraft IDs)
     material = "minecraft:beacon"
     
-    # 显示名称 (支持颜色代码和占位符)
-    display_name = "&c主城"
+    # Display name (supports color codes and placeholders)
+    display_name = "&cMain City"
     
-    # 物品描述 (lore)
+    # Item lore
     lore = [
-      "&9店员 技能学习",
-      "&7地标位置/warp zc"
+      "&9Staff skill learning",
+      "&7Landmark location /warp zc"
     ]
     
-    # 槽位编号
+    # Slot number
     slot = 10
     
-    # 物品数量 (可选，不需要可删除)
+    # Item count (optional, delete if not needed)
     count = 1
     
-    # 附魔列表 (格式："附魔 ID;等级") (可选，不需要可删除)
+    # Enchantment list (format: "enchantment_id;level") (optional)
     enchantments = [
       "minecraft:binding_curse;1"
     ]
     
-    # 是否隐藏附魔 (可选，不需要可删除)
+    # Hide enchantments (optional)
     hide_enchantments = true
     
-    # 左键点击执行的命令 (可选，不需要可删除)
+    # Left click commands (optional)
     left_click_commands = [
       "[close]",
       "[player] warp zc"
     ]
     
-    # 右键点击执行的命令 (可选，不需要可删除)
+    # Right click commands (optional)
     right_click_commands = [
       "[console] say Hello"
     ]
     
-    # 显示要求 (只有满足条件才显示) (可选，不需要可删除)
+    # View requirements (only shows when conditions met) (optional)
     view_requirement {
       requirements {
         "check_level" {
@@ -126,98 +135,58 @@ items {
       }
     }
     
-    # 优先级 (数字越大越优先显示) (可选，不需要可删除)
+    # Priority (higher number = higher priority) (optional)
     priority = 1
     
-    # NBT 数据 (见下方 NBT 格式说明) (可选，不需要可删除)
+    # NBT data (see NBT format section below) (optional)
     nbt_string {
       "CustomModelData" = "12345"
     }
   }
   
-  # 多个槽位配置 (边框等)
+  # Multiple slots configuration (borders, etc.)
   "border" {
     material = "yellow_stained_glass_pane"
-    display_name = "&7装饰"
-    slots = [0, 8, 17, 26]  # 多个槽位
+    display_name = "&7Decoration"
+    slots = [0, 8, 17, 26]  # Multiple slots
     priority = 0
   }
 }
 ```
 
-### 特殊命令格式
+### Special Command Formats
 
-- `[close]` - 关闭菜单
-- `[player] 命令` - 以玩家身份执行命令
-- `[console] 命令` - 以控制台身份执行命令
-- `[message] 消息` - 发送消息给玩家
+- `[close]` - Close menu
+- `[player] command` - Execute command as player
+- `[console] command` - Execute command as console
+- `[message] message` - Send message to player
 
 ---
 
-### Requirements - 视图要求系统
+## Requirements - View Requirement System
 
-Rquirements 用于控制菜单项的显示条件，只有满足所有条件时才会显示该物品。
+Requirements control menu item display conditions. Items only show when all conditions are met.
 
-#### 配置格式
+### Configuration Format
 
 ```hocon
-# 基础格式
+# Basic format
 requirements {
   "condition_name" {
-    type = "条件类型"
-    input = "输入值 (支持占位符)"
-    output = "期望值"
+    type = "condition_type"
+    input = "input_value (supports placeholders)"
+    output = "expected_value"
   }
 }
 
-# 完整示例
+# Complete example
 items {
   "10" {
     material = "beacon"
-    display_name = "&c主城"
+    display_name = "&cMain City"
     slot = 10
     
-    # 直接在物品配置中添加 requirements
-    requirements {
-      "level_check" {
-        type = "number >="
-        input = "%player_level%"
-        output = "10"
-      }
-    }
-  }
-}
-```
-
-### 支持的比较类型
-
-#### 数值比较
-
-| 类型 | 别名 | 说明 | 示例 |
-|------|------|------|------|
-| `number >` | `number greater` | 大于 | `input="<player_level>", output="10"` |
-| `number >=` | `number greater or equals` | 大于等于 | `input="<player_exp_total>", output="100"` |
-| `number <` | `number less` | 小于 | `input="<player_health>", output="5"` |
-| `number <=` | `number less or equals` | 小于等于 | `input="<player_food>", output="20"` |
-| `number equals` | - | 等于 | `input="<player_level>", output="50"` |
-
-##### 字符串比较
-
-| 类型 | 说明 | 示例 |
-|------|------|------|
-| `string equals` | 字符串相等 | `input="<player_world>", output="world"` |
-| `string contains` | 字符串包含 | `input="<player_name>", output="admin"` |
-| `string starts with` | 字符串开头 | `input="<player_uuid>", output="abc"` |
-| `string ends with` | 字符串结尾 | `input="<player_uuid>", output="123"` |
-
-#### 配置示例
-
-##### 等级要求
-```hocon
-items {
-  "10" {
-    material = "beacon"
-    # 直接在物品配置中添加 requirements
+    # Add requirements directly in item configuration
     requirements {
       "level_check" {
         type = "number >="
@@ -228,9 +197,49 @@ items {
   }
 }
 ```
-只有玩家等级 >= 10 时才显示
 
-##### 生命值要求
+### Supported Comparison Types
+
+#### Numeric Comparisons
+
+| Type | Alias | Description | Example |
+|------|-------|-------------|---------|
+| `number >` | `number greater` | Greater than | `input="<player_level>", output="10"` |
+| `number >=` | `number greater or equals` | Greater or equals | `input="<player_exp_total>", output="100"` |
+| `number <` | `number less` | Less than | `input="<player_health>", output="5"` |
+| `number <=` | `number less or equals` | Less or equals | `input="<player_food>", output="20"` |
+| `number equals` | - | Equals | `input="<player_level>", output="50"` |
+
+#### String Comparisons
+
+| Type | Description | Example |
+|------|-------------|---------|
+| `string equals` | String equals | `input="<player_world>", output="world"` |
+| `string contains` | String contains | `input="<player_name>", output="admin"` |
+| `string starts with` | String starts with | `input="<player_uuid>", output="abc"` |
+| `string ends with` | String ends with | `input="<player_uuid>", output="123"` |
+
+### Configuration Examples
+
+#### Level Requirement
+```hocon
+items {
+  "10" {
+    material = "beacon"
+    # Add requirements directly in item configuration
+    requirements {
+      "level_check" {
+        type = "number >="
+        input = "<player_level>"
+        output = "10"
+      }
+    }
+  }
+}
+```
+Only shows when player level >= 10
+
+#### Health Requirement
 ```hocon
 items {
   "10" {
@@ -245,9 +254,9 @@ items {
   }
 }
 ```
-只有玩家生命值 > 5 时才显示
+Only shows when player health > 5
 
-##### 世界限制
+#### World Restriction
 ```hocon
 items {
   "10" {
@@ -262,9 +271,9 @@ items {
   }
 }
 ```
-只有在主世界时才显示
+Only shows when in overworld
 
-##### 多重条件
+#### Multiple Conditions
 ```hocon
 items {
   "10" {
@@ -284,11 +293,11 @@ items {
   }
 }
 ```
-必须同时满足等级 >= 10 **且** 生命值 > 5 才显示
+Must satisfy level >= 10 **AND** health > 5 to show
 
-#### Right Click Requirement - 右键点击要求
+#### Right Click Requirement
 
-右键点击要求的配置方式相同，只需在命令配置中添加：
+Same configuration method, add to command configuration:
 
 ```hocon
 items {
@@ -297,7 +306,7 @@ items {
     left_click_commands = ["[player] cmd"]
     right_click_commands = ["[player] admin_cmd"]
     
-    # 右键点击也需要满足条件
+    # Right click also needs to meet conditions
     requirements {
       "permission_check" {
         type = "string equals"
@@ -309,30 +318,30 @@ items {
 }
 ```
 
-**说明**: 同一个物品只能有一组 `requirements`，它会同时影响显示和点击行为。
+**Note**: Each item can only have one set of `requirements`, which affects both display and click behavior.
 
-#### 注意事项
+### Important Notes
 
-1. **占位符解析**: `input` 和 `output` 都支持 MiniPlaceholders 占位符
-2. **多重条件**: 所有条件必须全部满足（AND 逻辑）
-3. **错误处理**: 如果条件配置错误，默认显示物品
-4. **性能优化**: 复杂的条件判断可能会有轻微性能影响
+1. **Placeholder Parsing**: Both `input` and `output` support MiniPlaceholders placeholders
+2. **Multiple Conditions**: All conditions must be satisfied (AND logic)
+3. **Error Handling**: If condition configuration is incorrect, item shows by default
+4. **Performance Optimization**: Complex condition checks may have slight performance impact
 
 ---
 
-## 支持的 NBT 格式
+## Supported NBT Formats
 
-### 1. 简单 NBT 类型
+### 1. Simple NBT Types
 
-#### nbt_string (字符串类型)
+#### nbt_string (String Type)
 ```hocon
 nbt_string {
   "CustomModelData" = "12345"
-  "display_name" = "神器"
+  "display_name" = "Divine Weapon"
 }
 ```
 
-#### nbt_int (整数类型)
+#### nbt_int (Integer Type)
 ```hocon
 nbt_int {
   "Damage" = 0
@@ -340,27 +349,27 @@ nbt_int {
 }
 ```
 
-#### nbt_double (双精度浮点数)
+#### nbt_double (Double Type)
 ```hocon
 nbt_double {
   "explosion_power" = 1.5
 }
 ```
 
-#### nbt_float (浮点数)
+#### nbt_float (Float Type)
 ```hocon
 nbt_float {
   "speed" = 0.5f
 }
 ```
 
-### 2. 复杂 NBT 结构 (nbt_form)
+### 2. Complex NBT Structures (nbt_form)
 
-支持完整的 HOCON 格式，可以定义复杂的嵌套结构：
+Supports complete HOCON format for defining complex nested structures:
 
 ```hocon
 nbt_form {
-  # 组件格式 (推荐用于 Minecraft 1.20.5+)
+  # Component format (recommended for Minecraft 1.20.5+)
   components {
     "minecraft:custom_data" {
       "lelmenu": {
@@ -390,13 +399,13 @@ nbt_form {
     }
   }
   
-  # 传统 NBT 标签格式
+  # Traditional NBT tag format
   tag {
-    # 简单值
+    # Simple values
     "Damage" = 0
     "Unbreakable" = true
     
-    # 列表
+    # Lists
     "ench" = [
       {
         id = 16s
@@ -408,14 +417,14 @@ nbt_form {
       }
     ]
     
-    # 嵌套结构
+    # Nested structures
     "EntityTag" {
       "id" = "minecraft:armor_stand"
-      "CustomName" = "{\"text\":\"守卫者\"}"
+      "CustomName" = "{\"text\":\"Guardian\"}"
       "Invulnerable" = true
     }
     
-    # 数组
+    # Arrays
     "SkullOwner" {
       Id = [I; 12345678, 12345678, 12345678, 12345678]
       Properties {
@@ -430,130 +439,130 @@ nbt_form {
 }
 ```
 
-### 3. NBT 数据注意事项
+### 3. NBT Data Notes
 
-- **数据类型后缀**:
-  - `s` = short (短整型)
-  - `b` = byte (字节型)
-  - `l` = long (长整型)
-  - `f` = float (浮点型)
-  - `d` = double (双精度)
-  - `B` = byte array (字节数组)
-  - `I` = int array (整数数组)
-  - `L` = long array (长整数组)
+- **Data Type Suffixes**:
+  - `s` = short
+  - `b` = byte
+  - `l` = long
+  - `f` = float
+  - `d` = double
+  - `B` = byte array
+  - `I` = int array
+  - `L` = long array
 
-- **占位符支持**: NBT 字符串值中可以使用占位符
-- **视图同步**: NBT 数据会在物品创建时自动应用
-
----
-
-## 支持的 MiniPlaceholders
-
-### 👤 Player 占位符 (玩家相关)
-
-#### 基本信息
-- `<player_uuid>` - 玩家 UUID
-- `<player_name>` - 玩家名字
-- `<player_prefix>` - 玩家前缀
-- `<player_suffix>` - 玩家后缀
-
-#### 位置和方向
-- `<player_world>` - 所在世界名称
-- `<player_x>` - X 坐标
-- `<player_y>` - Y 坐标
-- `<player_z>` - Z 坐标
-- `<player_direction>` - 面向方向 (南/西南/西/西北/北/东北/东/东南)
-
-#### 状态信息
-- `<player_health>` - 生命值
-- `<player_max_health>` - 最大生命值
-- `<player_food>` - 饱食度
-- `<player_saturation>` - 饱和度
-- `<player_can_fly>` - 能否飞行
-- `<player_flying>` - 是否正在飞行
-- `<player_fly_speed>` - 飞行速度
-- `<player_walk_speed>` - 行走速度
-
-#### 游戏信息
-- `<player_gamemode>` - 游戏模式
-- `<player_level>` - 经验等级
-- `<player_exp_total>` - 总经验值
-- `<player_exp>` - 当前等级经验
-- `<player_exp_to_next>` - 升级到下一级所需经验
-- `<player_ping>` - 网络延迟
-- `<player_language>` - 客户端语言
-
-#### 空气值
-- `<player_max_air>` - 最大空气值
-- `<player_remaining_air>` - 剩余空气值
-
-#### 手持物品
-- `<player_item_in_main_hand>` - 主手物品名称
-- `<player_item_in_off_hand>` - 副手物品名称
-
-#### 时间统计
-- `<player_time_played_seconds>` - 游戏时间 (秒)
-- `<player_time_played_minutes>` - 游戏时间 (分钟)
-- `<player_time_played_hours>` - 游戏时间 (小时)
-- `<player_time_played_days>` - 游戏时间 (天)
-- `<player_time_played>` - 游戏时间 (格式化输出，如 "1 d 2 h 30 m")
-- `<player_first_join>` - 首次加入时间
-
-### 🖥️ Server 占位符 (服务器相关)
-
-#### 基本信息
-- `<server_online>` - 在线玩家数
-- `<server_max_players>` - 最大玩家数
-- `<server_unique_players>` - 唯一玩家数 (去重)
-- `<server_motd>` - 服务器描述 (MOTD)
-
-#### 性能信息
-- `<server_tps>` - 每秒刻数 (TPS)
-- `<server_ram_used>` - 已用内存 (MB)
-- `<server_ram_free>` - 可用内存 (MB)
-- `<server_ram_total>` - 总内存 (MB)
-- `<server_ram_max>` - 最大内存 (MB)
-- `<server_cores>` - CPU 核心数
-
-#### 运行时间
-- `<server_uptime>` - 运行时间百分比
-- `<server_uptime_total>` - 总运行时间
-- `<server_time_world>` - 世界时间戳
-
-### 💰 Economy 占位符 (经济系统)
-
-#### 个人经济
-- `<economy_balance>` - 玩家余额 (原始数值)
-- `<economy_balance_formatted>` - 格式化后的余额 (带货币符号)
-- `<economy_currency_name>` - 货币名称
-- `<economy_currency_symbol>` - 货币符号
-
-#### 财富排行榜
-- `<economy_baltop_1>` ~ `<economy_baltop_5>` - 富豪榜前 5 名玩家名字
-- `<economy_baltop_1_balance>` ~ `<economy_baltop_5_balance>` - 富豪榜前 5 名玩家余额
-
-### 📊 其他占位符
-
-#### 全局占位符
-- `<server_hello>` - 你好 (测试用)
-- `<server_server_name>` - 服务器名称 (自定义)
+- **Placeholder Support**: NBT string values can use placeholders
+- **View Synchronization**: NBT data is automatically applied when item is created
 
 ---
 
-## 配置示例
+## Supported MiniPlaceholders
 
-### 完整的主菜单配置
+### 👤 Player Placeholders
+
+#### Basic Info
+- `<player_uuid>` - Player UUID
+- `<player_name>` - Player name
+- `<player_prefix>` - Player prefix
+- `<player_suffix>` - Player suffix
+
+#### Location and Direction
+- `<player_world>` - Current world name
+- `<player_x>` - X coordinate
+- `<player_y>` - Y coordinate
+- `<player_z>` - Z coordinate
+- `<player_direction>` - Facing direction (South/Southwest/West/Northwest/North/Northeast/East/Southeast)
+
+#### Status Info
+- `<player_health>` - Health
+- `<player_max_health>` - Max health
+- `<player_food>` - Food level
+- `<player_saturation>` - Saturation
+- `<player_can_fly>` - Can fly
+- `<player_flying>` - Is flying
+- `<player_fly_speed>` - Fly speed
+- `<player_walk_speed>` - Walk speed
+
+#### Game Info
+- `<player_gamemode>` - Game mode
+- `<player_level>` - Experience level
+- `<player_exp_total>` - Total experience
+- `<player_exp>` - Current level experience
+- `<player_exp_to_next>` - Experience needed for next level
+- `<player_ping>` - Network ping
+- `<player_language>` - Client language
+
+#### Air Values
+- `<player_max_air>` - Max air
+- `<player_remaining_air>` - Remaining air
+
+#### Held Items
+- `<player_item_in_main_hand>` - Main hand item name
+- `<player_item_in_off_hand>` - Off hand item name
+
+#### Time Statistics
+- `<player_time_played_seconds>` - Play time (seconds)
+- `<player_time_played_minutes>` - Play time (minutes)
+- `<player_time_played_hours>` - Play time (hours)
+- `<player_time_played_days>` - Play time (days)
+- `<player_time_played>` - Play time (formatted, e.g., "1 d 2 h 30 m")
+- `<player_first_join>` - First join time
+
+### 🖥️ Server Placeholders
+
+#### Basic Info
+- `<server_online>` - Online player count
+- `<server_max_players>` - Max player count
+- `<server_unique_players>` - Unique player count
+- `<server_motd>` - Server MOTD
+
+#### Performance Info
+- `<server_tps>` - Ticks per second (TPS)
+- `<server_ram_used>` - Used memory (MB)
+- `<server_ram_free>` - Free memory (MB)
+- `<server_ram_total>` - Total memory (MB)
+- `<server_ram_max>` - Max memory (MB)
+- `<server_cores>` - CPU cores
+
+#### Uptime
+- `<server_uptime>` - Uptime percentage
+- `<server_uptime_total>` - Total uptime
+- `<server_time_world>` - World timestamp
+
+### 💰 Economy Placeholders
+
+#### Personal Economy
+- `<economy_balance>` - Player balance (raw value)
+- `<economy_balance_formatted>` - Formatted balance (with currency symbol)
+- `<economy_currency_name>` - Currency name
+- `<economy_currency_symbol>` - Currency symbol
+
+#### Wealth Leaderboard
+- `<economy_baltop_1>` ~ `<economy_baltop_5>` - Top 5 richest players names
+- `<economy_baltop_1_balance>` ~ `<economy_baltop_5_balance>` - Top 5 richest players balances
+
+### 📊 Other Placeholders
+
+#### Global Placeholders
+- `<server_hello>` - Hello (test)
+- `<server_server_name>` - Server name (custom)
+
+---
+
+## Configuration Example
+
+### Complete Main Menu Configuration
 
 ```hocon
 rows = 3
 open_command = "main"
 register_command = true
 update_interval = 5
-menu_title = "&c&l乐联&7-> &d服务菜单"
+menu_title = "&c&lLel&7-> &dService Menu"
 sweet = true
 
 items {
-  # 背景
+  # Background
   "background" {
     material = "white_stained_glass_pane"
     display_name = " "
@@ -565,16 +574,16 @@ items {
     priority = 0
   }
   
-  # 主城入口
+  # Main City Entry
   "spawn" {
     material = "beacon"
-    display_name = "&c&l主城"
+    display_name = "&c&lMain City"
     lore = [
       "",
-      "&9● 店员技能学习",
-      "&7● 地标位置 /warp zc",
+      "&9● Staff skill learning",
+      "&7● Landmark location /warp zc",
       "",
-      "&e点击传送"
+      "&eClick to teleport"
     ]
     slot = 11
     enchantments = ["minecraft:binding_curse;1"]
@@ -586,16 +595,16 @@ items {
     priority = 2
   }
   
-  # 商店
+  # Shop
   "shop" {
     material = "emerald"
-    display_name = "&a&l商店"
+    display_name = "&a&lShop"
     lore = [
       "",
-      "&7点击进入商店",
-      "&7购买各种物品",
+      "&7Click to enter shop",
+      "&7Buy various items",
       "",
-      "&e点击打开"
+      "&eClick to open"
     ]
     slot = 13
     left_click_commands = [
@@ -605,17 +614,17 @@ items {
     priority = 2
   }
   
-  # 个人信息
+  # Personal Info
   "info" {
     material = "book"
-    display_name = "&b&l个人信息"
+    display_name = "&b&lPersonal Info"
     lore = [
       "",
-      "&7你的名字：%player_name%",
-      "&7你的生命：%player_health%/%player_max_health%",
-      "&7你的余额：%economy_balance_formatted%",
+      "&7Your name: <player_name>",
+      "&7Your health: <player_health>/<player_max_health>",
+      "&7Your balance: <economy_balance_formatted>",
       "",
-      "&e点击查看"
+      "&eClick to view"
     ]
     slot = 15
     left_click_commands = [
@@ -629,30 +638,34 @@ items {
 
 ---
 
-## 常见问题
+## FAQ
 
-### Q: 命令不工作怎么办？
-A: 检查以下几点：
-1. 确保配置文件中有 `open_command` 字段
-3. 使用 `/menureload` 重新加载配置
-4. 检查权限 `lelmenu.use`
+### Q: Commands not working?
+A: Check the following:
+1. Ensure `open_command` field exists in configuration
+2. Use `/menureload` to reload configurations
+3. Check permission `lelmenu.use`
 
-### Q: 占位符不显示？
-A: 确保安装了 MiniPlaceholders 插件，并且占位符格式正确
+### Q: Placeholders not displaying?
+A: Ensure MiniPlaceholders plugin is installed and placeholder format is correct
 
-### Q: NBT 数据不生效？
-A: 检查 NBT 格式是否正确，确保数据类型匹配
-
----
-
-## 依赖
-
-- [SpongeAPI](https://www.spongepowered.org/) - 核心 API
-- [MiniPlaceholders](https://github.com/MiniPlaceholders/MiniPlaceholders) - 占位符支持
-- CommandPack (可选) - 经济系统支持
+### Q: NBT data not working?
+A: Check NBT format is correct and data types match
 
 ---
 
-## 支持与反馈
+## Dependencies
 
-如有问题或建议，请提交 Issue 或联系开发者。
+- [SpongeAPI](https://www.spongepowered.org/) - Core API
+- [MiniPlaceholders](https://github.com/MiniPlaceholders/MiniPlaceholders) - Placeholder support
+- CommandPack (optional) - Economy system support
+
+---
+
+## Support and Feedback
+
+If you have any questions or suggestions, please submit an Issue or contact the developer.
+
+**Version**: 1.0.0  
+**Author**: LelMC Team  
+**License**: MIT License
