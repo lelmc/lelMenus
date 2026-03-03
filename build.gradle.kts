@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    implementation(files("libs/MiniPlaceholders-Sponge-3.1.0.jar"))
+    implementation("io.github.miniplaceholders:miniplaceholders-api:3.1.0")
 }
 
 sponge {
