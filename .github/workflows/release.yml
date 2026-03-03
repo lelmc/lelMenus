@@ -3,7 +3,7 @@ name: 自动构建与发布
 on:
   push:
     branches:
-      - main  # 只在推送到 main 分支时运行
+      - master  # 只在推送到 master 分支时运行
     tags:
       - 'v*'  # 推送标签时也运行
 
