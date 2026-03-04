@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.*;
 import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
@@ -22,10 +23,11 @@ import java.util.function.Consumer;
 
 public class ChestMenu {
     private static final Map<UUID, ChestMenu> openMenus = new HashMap<>();
-    private final int rows;  // 行数
+    private final int rows;
     private final Component title;
     private final Map<Integer, ItemStack> items = new HashMap<>();
     private final Map<Integer, Consumer<ClickType<?>>> clickActions = new HashMap<>();
+    private final Map<Integer, MenuConfig.MenuItemConfig> updateItems = new HashMap<>();
     private String menuName;
     private int updateInterval = 0;
     private ScheduledTask updateTask;
@@ -52,17 +54,18 @@ public class ChestMenu {
         return openMenus.get(player.uniqueId());
     }
 
-    public static void refreshMenu(ServerPlayer player, String menuName) {
-        ChestMenu currentMenu = getOpenMenu(player);
-        if (currentMenu != null && currentMenu.getMenuName().equals(menuName)) {
-            ChestMenu newMenu = MenuLoader.loadMenu(menuName, player);
-            if (newMenu != null) {
-                newMenu.items.forEach((slot, itemStack) ->
-                        currentMenu.inventory.slot(slot)
-                                .ifPresent(slotObj ->
-                                        slotObj.set(itemStack)));
-            }
+    public void refreshMenu(ServerPlayer player) {
+        ChestMenu newMenu = MenuLoader.loadMenu(menuName, player);
+        if (newMenu == null) {
+            return;
         }
+        newMenu.items.forEach((slot, itemStack) -> inventory
+                .slot(slot)
+                .ifPresent(slotObj -> slotObj.set(itemStack)));
+    }
+
+    public void putUpdateItem(int slot, MenuConfig.MenuItemConfig item) {
+        updateItems.put(slot, item);
     }
 
     public String getMenuName() {
@@ -106,11 +109,11 @@ public class ChestMenu {
 
             // 注册点击处理器
             menu.registerSlotClick(new MenuClickHandler(Lelmenus.instance.container, menu, inventory, player, clickActions));
-
             // 打开菜单
             menu.open(player);
             openMenus.put(player.uniqueId(), this);
 
+            menu.registerClose((cause, container) -> updateTask.cancel());
             // 设置自动更新任务
             if (updateInterval > 0) {
                 startUpdateTask(player);
@@ -124,13 +127,14 @@ public class ChestMenu {
     private void startUpdateTask(ServerPlayer player) {
         updateTask = Sponge.server().scheduler().executor(Lelmenus.instance.container)
                 .scheduleAtFixedRate(() -> {
-                    if (player.isOnline() && openMenus.containsKey(player.uniqueId())) {
-                        refreshMenu(player, menuName);
-                    } else {
-                        // 如果玩家不在线或菜单已关闭，停止任务
-                        if (updateTask != null) {
-                            updateTask.cancel();
-                        }
+                    boolean isMain = Sponge.server().onMainThread();
+                    System.out.println("isMain: " + isMain);
+                    try (CauseStackManager.StackFrame frame = Sponge.server().causeStackManager().pushCauseFrame()) {
+                        frame.pushCause(Lelmenus.instance.container);
+                        updateItems.forEach((slot, item) -> {
+                            ItemStack itemStack = MenuLoader.createItemStack(item, player);
+                            inventory.slot(slot).ifPresent(slotObj -> slotObj.set(itemStack));
+                        });
                     }
                 }, updateInterval, updateInterval, TimeUnit.SECONDS).task();
     }

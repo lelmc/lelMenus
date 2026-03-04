@@ -120,8 +120,17 @@ public class MenuConfig {
         @Setting("left_click_commands")
         private List<String> leftClickCommands = new ArrayList<>();
 
+        @Setting("shift_left_click_commands")
+        private List<String> shiftLeftClickCommands = new ArrayList<>();
+
         @Setting("right_click_commands")
         private List<String> rightClickCommands = new ArrayList<>();
+
+        @Setting("shift_right_click_commands")
+        private List<String> shiftRightClickCommands = new ArrayList<>();
+
+        @Setting("middle_click_requirement")
+        private List<String> middleClickCommands = new ArrayList<>();
 
         @Setting
         private Map<String, Map<String, String>> requirements = new HashMap<>();
@@ -255,6 +264,30 @@ public class MenuConfig {
 
         public void setRightClickCommands(List<String> rightClickCommands) {
             this.rightClickCommands = rightClickCommands;
+        }
+
+        public List<String> getShiftLeftClickCommands() {
+            return shiftLeftClickCommands;
+        }
+
+        public void setShiftLeftClickCommands(List<String> shiftLeftClickCommands) {
+            this.shiftLeftClickCommands = shiftLeftClickCommands;
+        }
+
+        public List<String> getShiftRightClickCommands() {
+            return shiftRightClickCommands;
+        }
+
+        public void setShiftRightClickCommands(List<String> shiftRightClickCommands) {
+            this.shiftRightClickCommands = shiftRightClickCommands;
+        }
+
+        public List<String> getMiddleClickCommands() {
+            return middleClickCommands;
+        }
+
+        public void setMiddleClickCommands(List<String> middleClickCommands) {
+            this.middleClickCommands = middleClickCommands;
         }
 
         public Map<String, Map<String, String>> getRequirements() {

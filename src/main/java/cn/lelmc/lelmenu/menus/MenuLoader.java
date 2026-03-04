@@ -36,7 +36,6 @@ public class MenuLoader {
         if (config == null) {
             return null;
         }
-
         ChestMenu menu = new ChestMenu(config.getMenuTitle(), config.getRows());
         menu.setMenuName(menuName);
         menu.setUpdateInterval(config.getUpdateInterval());
@@ -81,22 +80,24 @@ public class MenuLoader {
         for (Map.Entry<Integer, MenuConfig.MenuItemConfig> entry : slotItems.entrySet()) {
             int slot = entry.getKey();
             MenuConfig.MenuItemConfig itemConfig = entry.getValue();
-
+            if (itemConfig.isUpdate()) {
+                menu.putUpdateItem(slot, itemConfig);
+            }
             ItemStack itemStack = createItemStack(itemConfig, player);
             if (!itemStack.isEmpty()) {
                 menu.setItem(slot, itemStack);
-
                 // 设置点击事件
                 menu.setAction(slot, clickType -> {
-                    // 左键或Shift+左键
-                    if (clickType.equals(ClickTypes.CLICK_LEFT.get()) ||
-                            clickType.equals(ClickTypes.SHIFT_CLICK_LEFT.get())) {
+                    if (clickType.equals(ClickTypes.SHIFT_CLICK_LEFT.get())) {
+                        handleCommands(itemConfig.getShiftLeftClickCommands(), player);
+                    } else if (clickType.equals(ClickTypes.SHIFT_CLICK_RIGHT.get())) {
+                        handleCommands(itemConfig.getShiftRightClickCommands(), player);
+                    } else if (clickType.equals(ClickTypes.CLICK_LEFT.get())) {
                         handleCommands(itemConfig.getLeftClickCommands(), player);
-                    }
-                    // 右键或Shift+右键
-                    else if (clickType.equals(ClickTypes.CLICK_RIGHT.get()) ||
-                            clickType.equals(ClickTypes.SHIFT_CLICK_RIGHT.get())) {
+                    } else if (clickType.equals(ClickTypes.CLICK_RIGHT.get())) {
                         handleCommands(itemConfig.getRightClickCommands(), player);
+                    } else if (clickType.equals(ClickTypes.CLICK_MIDDLE.get())) {
+                        handleCommands(itemConfig.getMiddleClickCommands(), player);
                     }
                 });
             }
@@ -105,113 +106,107 @@ public class MenuLoader {
     }
 
     // 创建物品堆
-    private static ItemStack createItemStack(MenuConfig.MenuItemConfig config, ServerPlayer player) {
-        try {
-            // 解析物品类型
-            String materialStr = config.getMaterial();
-            if (!materialStr.contains(":")) {
-                materialStr = "minecraft:" + materialStr;
+    public static ItemStack createItemStack(MenuConfig.MenuItemConfig config, ServerPlayer player) {
+        String materialStr = config.getMaterial();
+        if (!materialStr.contains(":")) {
+            materialStr = "minecraft:" + materialStr;
+        }
+
+        ResourceKey itemKey = ResourceKey.resolve(materialStr.toLowerCase());
+        ItemType itemType = RegistryTypes.ITEM_TYPE.get()
+                .findValue(itemKey)
+                .orElse(ItemTypes.STONE.get());
+
+        DataContainer container = ItemStack.of(itemType).toContainer();
+
+        // 创建 components 视图
+        DataQuery dataQuery = DataQuery.of("components");
+        DataView dataView = container.createView(dataQuery);
+        // 处理简单的 nbtString
+        if (config.getNbtString() != null) {
+            for (Map.Entry<String, String> entry : config.getNbtString().entrySet()) {
+                String value = Placeholder.parseString(entry.getValue(), player);
+                dataView.set(DataQuery.of(entry.getKey()), value);
             }
+        }
 
-            ResourceKey itemKey = ResourceKey.resolve(materialStr.toLowerCase());
-            ItemType itemType = RegistryTypes.ITEM_TYPE.get()
-                    .findValue(itemKey)
-                    .orElse(ItemTypes.STONE.get());
+        // 处理 nbtInt
+        for (Map.Entry<String, Integer> entry : config.getNbtInt().entrySet()) {
+            dataView.set(DataQuery.of(entry.getKey()), entry.getValue());
+        }
 
-            DataContainer container = ItemStack.of(itemType).toContainer();
+        // 处理 nbtDouble
+        for (Map.Entry<String, Double> entry : config.getNbtDouble().entrySet()) {
+            dataView.set(DataQuery.of(entry.getKey()), entry.getValue());
+        }
 
-            // 创建 components 视图
-            DataQuery dataQuery = DataQuery.of("components");
-            DataView dataView = container.createView(dataQuery);
-            // 处理简单的 nbtString
-            if (config.getNbtString() != null) {
-                for (Map.Entry<String, String> entry : config.getNbtString().entrySet()) {
-                    String value = Placeholder.parseString(entry.getValue(), player);
-                    dataView.set(DataQuery.of(entry.getKey()), value);
-                }
-            }
+        // 处理 nbtFloat
+        for (Map.Entry<String, Float> entry : config.getNbtFloat().entrySet()) {
+            dataView.set(DataQuery.of(entry.getKey()), entry.getValue());
+        }
 
-            // 处理 nbtInt
-            for (Map.Entry<String, Integer> entry : config.getNbtInt().entrySet()) {
-                dataView.set(DataQuery.of(entry.getKey()), entry.getValue());
-            }
+        if (config.getNbtForm() != null) {
+            ConfigurationNode nbtFormNode = config.getNbtForm();
+            // 检查是否有有效数据
+            if (!nbtFormNode.virtual() && !nbtFormNode.childrenMap().isEmpty()) {
+                for (Map.Entry<Object, ? extends ConfigurationNode> entry : nbtFormNode.childrenMap().entrySet()) {
+                    String componentKey = entry.getKey().toString();
+                    ConfigurationNode componentNode = entry.getValue();
 
-            // 处理 nbtDouble
-            for (Map.Entry<String, Double> entry : config.getNbtDouble().entrySet()) {
-                dataView.set(DataQuery.of(entry.getKey()), entry.getValue());
-            }
+                    // 创建组件子视图
+                    DataView componentView = dataView.createView(DataQuery.of(componentKey));
 
-            // 处理 nbtFloat
-            for (Map.Entry<String, Float> entry : config.getNbtFloat().entrySet()) {
-                dataView.set(DataQuery.of(entry.getKey()), entry.getValue());
-            }
+                    // 遍历组件内的所有属性
+                    for (Map.Entry<Object, ? extends ConfigurationNode> propEntry : componentNode.childrenMap().entrySet()) {
+                        String propertyKey = propEntry.getKey().toString();
+                        ConfigurationNode propertyNode = propEntry.getValue();
 
-            if (config.getNbtForm() != null) {
-                ConfigurationNode nbtFormNode = config.getNbtForm();
-                // 检查是否有有效数据
-                if (!nbtFormNode.virtual() && !nbtFormNode.childrenMap().isEmpty()) {
-                    for (Map.Entry<Object, ? extends ConfigurationNode> entry : nbtFormNode.childrenMap().entrySet()) {
-                        String componentKey = entry.getKey().toString();
-                        ConfigurationNode componentNode = entry.getValue();
-
-                        // 创建组件子视图
-                        DataView componentView = dataView.createView(DataQuery.of(componentKey));
-
-                        // 遍历组件内的所有属性
-                        for (Map.Entry<Object, ? extends ConfigurationNode> propEntry : componentNode.childrenMap().entrySet()) {
-                            String propertyKey = propEntry.getKey().toString();
-                            ConfigurationNode propertyNode = propEntry.getValue();
-
-                            // 根据节点类型获取值
-                            if (propertyNode.isList()) {
-                                List<String> list = new ArrayList<>();
-                                for (ConfigurationNode item : propertyNode.childrenList()) {
-                                    String s = Placeholder.parseString(item.getString(""), player);
-                                    list.add(s);
-                                }
-                                componentView.set(DataQuery.of(propertyKey), list);
-                            } else {
-                                Object value = propertyNode.raw();
-                                if (value != null) {
-                                    componentView.set(DataQuery.of(propertyKey), value);
-                                }
+                        // 根据节点类型获取值
+                        if (propertyNode.isList()) {
+                            List<String> list = new ArrayList<>();
+                            for (ConfigurationNode item : propertyNode.childrenList()) {
+                                String s = Placeholder.parseString(item.getString(""), player);
+                                list.add(s);
+                            }
+                            componentView.set(DataQuery.of(propertyKey), list);
+                        } else {
+                            Object value = propertyNode.raw();
+                            if (value != null) {
+                                componentView.set(DataQuery.of(propertyKey), value);
                             }
                         }
                     }
                 }
             }
-
-            ItemStack stack = ItemStack.builder()
-                    .fromContainer(container)
-                    .quantity(config.getCount())
-                    .build();
-
-            // 解析显示名称
-            String displayName = Placeholder.parseString(config.getDisplayName(), player);
-            Component displayComponent = ColorUtils.toComponent(displayName);
-            stack.offer(Keys.CUSTOM_NAME, displayComponent);
-
-            // 解析lore
-            List<String> loreList = new ArrayList<>();
-            for (String line : config.getLore()) {
-                loreList.add(Placeholder.parseString(line, player));
-            }
-            String[] loreArray = loreList.toArray(new String[0]);
-            if (loreArray.length > 0) {
-                List<Component> loreComponents = ColorUtils.toComponentList(Arrays.asList(loreArray));
-                stack.offer(Keys.LORE, loreComponents);
-            }
-
-            // 处理附魔
-            if (!config.getEnchantments().isEmpty()) {
-                stack = applyEnchantmentsToItem(stack, config.getEnchantments(), config.isHideEnchantments());
-            }
-
-            return stack;
-
-        } catch (Exception e) {
-            return ItemStack.empty();
         }
+
+        ItemStack stack = ItemStack.builder()
+                .fromContainer(container)
+                .quantity(config.getCount())
+                .build();
+
+        // 解析显示名称
+        String displayName = Placeholder.parseString(config.getDisplayName(), player);
+        Component displayComponent = ColorUtils.toComponent(displayName);
+        stack.offer(Keys.CUSTOM_NAME, displayComponent);
+
+        // 解析lore
+        List<String> loreList = new ArrayList<>();
+        for (String line : config.getLore()) {
+            loreList.add(Placeholder.parseString(line, player));
+        }
+        String[] loreArray = loreList.toArray(new String[0]);
+        if (loreArray.length > 0) {
+            List<Component> loreComponents = ColorUtils.toComponentList(Arrays.asList(loreArray));
+            stack.offer(Keys.LORE, loreComponents);
+        }
+
+        // 处理附魔
+        if (!config.getEnchantments().isEmpty()) {
+            stack = applyEnchantmentsToItem(stack, config.getEnchantments(), config.isHideEnchantments());
+        }
+
+        return stack;
     }
 
     /**
@@ -387,8 +382,8 @@ public class MenuLoader {
     private static void handleCommands(List<String> commands, ServerPlayer player) {
         for (String command : commands) {
             if (command.startsWith("[refresh]")) {
-                String menuName = ChestMenu.getOpenMenu(player).getMenuName();
-                ChestMenu.refreshMenu(player, menuName);
+                ChestMenu openMenu = ChestMenu.getOpenMenu(player);
+                openMenu.refreshMenu(player);
             } else if (command.startsWith("[close]")) {
                 ChestMenu.closeMenu(player);
             } else if (command.startsWith("[player]")) {
