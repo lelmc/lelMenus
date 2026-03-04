@@ -23,7 +23,6 @@ public class Lelmenus {
     public final Logger logger;
     public final PluginContainer container;
     public Path configDir;
-    public MenuLoader menuLoader;
     public ConfigManager configManager;
 
     @Inject
@@ -38,7 +37,7 @@ public class Lelmenus {
     public void onConstruct(ConstructPluginEvent event) {
         // 初始化
         configManager = new ConfigManager();
-        menuLoader = new MenuLoader(configManager);
+        MenuLoader.setConfigManager(configManager);
     }
 
     @Listener

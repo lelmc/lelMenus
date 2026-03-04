@@ -13,7 +13,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.economy.account.UniqueAccount;
-import org.spongepowered.api.statistic.Statistics;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -99,8 +98,10 @@ public class PlaceholderProvider {
                         createTag(String.valueOf(Math.round(p.get(Keys.SATURATION).orElse(5.0)))))
 
                 // 游戏模式和经验
-                .audiencePlaceholder(ServerPlayer.class, "gamemode", (p, ctx, queue) ->
-                        createTag(p.gameMode().get().asComponent().examinableName()))
+                .audiencePlaceholder(ServerPlayer.class, "gamemode", (p, ctx, queue) -> {
+                    Component gamemodeComponent = p.gameMode().get().asComponent();
+                    return Tag.selfClosingInserting(gamemodeComponent);
+                })
                 .audiencePlaceholder(ServerPlayer.class, "exp_total", (p, ctx, queue) ->
                         createTag(String.valueOf(p.get(Keys.EXPERIENCE).orElse(0))))
                 .audiencePlaceholder(ServerPlayer.class, "exp", (p, ctx, queue) ->
@@ -117,26 +118,30 @@ public class PlaceholderProvider {
                         createTag(String.valueOf(p.get(Keys.REMAINING_AIR).orElse(300))))
 
                 // 手持物品
-                .audiencePlaceholder(ServerPlayer.class, "item_in_main_hand", (p, ctx, queue) ->
-                        createTag(getDisplayName(p.itemInHand(HandTypes.MAIN_HAND))))
-                .audiencePlaceholder(ServerPlayer.class, "item_in_off_hand", (p, ctx, queue) ->
-                        createTag(getDisplayName(p.itemInHand(HandTypes.OFF_HAND))))
+                .audiencePlaceholder(ServerPlayer.class, "hand_main", (p, ctx, queue) -> {
+                    Component displayName = getDisplayName(p.itemInHand(HandTypes.MAIN_HAND));
+                    return Tag.selfClosingInserting(displayName);
+                })
+                .audiencePlaceholder(ServerPlayer.class, "hand_off", (p, ctx, queue) -> {
+                    Component displayName = getDisplayName(p.itemInHand(HandTypes.OFF_HAND));
+                    return Tag.selfClosingInserting(displayName);
+                })
 
                 // 移动速度
                 .audiencePlaceholder(ServerPlayer.class, "walk_speed", (p, ctx, queue) ->
                         createTag(String.valueOf(p.get(Keys.WALKING_SPEED).orElse(1.0))))
 
                 // 游戏时间
-                .audiencePlaceholder(ServerPlayer.class, "time_played_seconds", (p, ctx, queue) ->
-                        createTag(String.valueOf(getTime(p, TimeUnit.SECONDS, true))))
-                .audiencePlaceholder(ServerPlayer.class, "time_played_minutes", (p, ctx, queue) ->
-                        createTag(String.valueOf(getTime(p, TimeUnit.MINUTES, true))))
-                .audiencePlaceholder(ServerPlayer.class, "time_played_ticks", (p, ctx, queue) ->
-                        createTag(String.valueOf(getTime(p, null, true))))
-                .audiencePlaceholder(ServerPlayer.class, "time_played_hours", (p, ctx, queue) ->
-                        createTag(String.valueOf(getTime(p, TimeUnit.HOURS, true))))
-                .audiencePlaceholder(ServerPlayer.class, "time_played_days", (p, ctx, queue) ->
-                        createTag(String.valueOf(getTime(p, TimeUnit.DAYS, true))))
+                .audiencePlaceholder(ServerPlayer.class, "time_seconds", (p, ctx, queue) ->
+                        createTag(String.valueOf(getTime(p, TimeUnit.SECONDS))))
+                .audiencePlaceholder(ServerPlayer.class, "time_minutes", (p, ctx, queue) ->
+                        createTag(String.valueOf(getTime(p, TimeUnit.MINUTES))))
+                .audiencePlaceholder(ServerPlayer.class, "time_ticks", (p, ctx, queue) ->
+                        createTag(String.valueOf(getTime(p, null))))
+                .audiencePlaceholder(ServerPlayer.class, "time_hours", (p, ctx, queue) ->
+                        createTag(String.valueOf(getTime(p, TimeUnit.HOURS))))
+                .audiencePlaceholder(ServerPlayer.class, "time_days", (p, ctx, queue) ->
+                        createTag(String.valueOf(getTime(p, TimeUnit.DAYS))))
                 .audiencePlaceholder(ServerPlayer.class, "time_played", (p, ctx, queue) ->
                         createTag(formatTime(p)))
 
@@ -152,10 +157,9 @@ public class PlaceholderProvider {
         playerExpansion.register();
     }
 
-    public static String getDisplayName(ItemStack snapshot) {
-        return snapshot.get(Keys.CUSTOM_NAME)
-                .map(PlainTextComponentSerializer.plainText()::serialize)
-                .orElseGet(() -> snapshot.type().asComponent().toString());
+    public static Component getDisplayName(ItemStack snapshot) {
+        return snapshot.get(Keys.DISPLAY_NAME)
+                .orElse(snapshot.type().asComponent());
     }
 
     private static void registerServerExpansion() {
@@ -381,28 +385,29 @@ public class PlaceholderProvider {
         return "未知";
     }
 
-    private static long getTime(ServerPlayer p, TimeUnit unit, boolean raw) {
-        // 尝试通过统计信息获取游戏时间
-        var stats = p.statistics();
+    private static long getTime(ServerPlayer p, TimeUnit unit) {
+        var stats = p.statistics().get();
+        Long ticks = stats.entrySet().stream()
+                .filter(entry -> entry.getKey().toString().contains("play_time"))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
+        if (ticks != null) {
+            long seconds = ticks / 20;
 
-        // 获取玩家的游戏时间统计（以刻为单位）
-        var ticks = stats.get().get(Statistics.PLAY_TIME.get());
+            return switch (unit) {
+                case SECONDS -> seconds;
+                case MINUTES -> seconds / 60;
+                case HOURS -> seconds / 3600;
+                case DAYS -> seconds / 86400;
+            };
+        }
 
-        // Minecraft 中 1 秒 = 20 tick
-        long seconds = ticks / 20;
-
-        if (unit == null) return ticks;
-
-        return switch (unit) {
-            case SECONDS -> seconds;
-            case MINUTES -> seconds / 60;
-            case HOURS -> seconds / 3600;
-            case DAYS -> seconds / 86400;
-        };
+        return 0;
     }
 
     private static String formatTime(ServerPlayer p) {
-        long totalSeconds = getTime(p, TimeUnit.SECONDS, false);
+        long totalSeconds = getTime(p, TimeUnit.SECONDS);
 
         long d = totalSeconds / 86400;
         long h = (totalSeconds % 86400) / 3600;

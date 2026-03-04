@@ -29,6 +29,7 @@ public class ChestMenu {
     private String menuName;
     private int updateInterval = 0;
     private ScheduledTask updateTask;
+    private ViewableInventory inventory;
 
     public ChestMenu(String title, int rows) {
         this.title = ColorUtils.toComponent(title);
@@ -52,13 +53,15 @@ public class ChestMenu {
     }
 
     public static void refreshMenu(ServerPlayer player, String menuName) {
-        ChestMenu newMenu = Lelmenus
-                .instance
-                .menuLoader
-                .loadMenu(menuName, player);
-        if (newMenu != null) {
-            player.closeInventory();
-            newMenu.open(player);
+        ChestMenu currentMenu = getOpenMenu(player);
+        if (currentMenu != null && currentMenu.getMenuName().equals(menuName)) {
+            ChestMenu newMenu = MenuLoader.loadMenu(menuName, player);
+            if (newMenu != null) {
+                newMenu.items.forEach((slot, itemStack) ->
+                        currentMenu.inventory.slot(slot)
+                                .ifPresent(slotObj ->
+                                        slotObj.set(itemStack)));
+            }
         }
     }
 
@@ -85,7 +88,7 @@ public class ChestMenu {
     public void open(ServerPlayer player) {
         try {
             ContainerType containerType = getContainerTypeForRows(rows);
-            ViewableInventory inventory = ViewableInventory.builder()
+            inventory = ViewableInventory.builder()
                     .type(containerType)
                     .completeStructure()
                     .carrier(player)
@@ -97,11 +100,9 @@ public class ChestMenu {
             menu.setTitle(title);
 
             // 填充物品
-            items.forEach((slot, itemStack) -> {
-                inventory.slot(slot).ifPresent(slotObj -> {
-                    slotObj.set(itemStack);
-                });
-            });
+            items.forEach((slot, itemStack) ->
+                    inventory.slot(slot).ifPresent(slotObj ->
+                            slotObj.set(itemStack)));
 
             // 注册点击处理器
             menu.registerSlotClick(new MenuClickHandler(Lelmenus.instance.container, menu, inventory, player, clickActions));

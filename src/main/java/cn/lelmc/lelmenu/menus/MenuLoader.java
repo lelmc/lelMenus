@@ -23,9 +23,15 @@ import org.spongepowered.configurate.ConfigurationNode;
 
 import java.util.*;
 
-public  record MenuLoader(ConfigManager configManager) {
+public class MenuLoader {
 
-    public ChestMenu loadMenu(String menuName, ServerPlayer player) {
+    public static ConfigManager configManager;
+
+    public static void setConfigManager(ConfigManager configManager) {
+        MenuLoader.configManager = configManager;
+    }
+
+    public static ChestMenu loadMenu(String menuName, ServerPlayer player) {
         MenuConfig config = configManager.getMenu(menuName);
         if (config == null) {
             return null;
@@ -99,7 +105,7 @@ public  record MenuLoader(ConfigManager configManager) {
     }
 
     // 创建物品堆
-    private ItemStack createItemStack(MenuConfig.MenuItemConfig config, ServerPlayer player) {
+    private static ItemStack createItemStack(MenuConfig.MenuItemConfig config, ServerPlayer player) {
         try {
             // 解析物品类型
             String materialStr = config.getMaterial();
@@ -211,7 +217,7 @@ public  record MenuLoader(ConfigManager configManager) {
     /**
      * 应用附魔到物品
      */
-    private ItemStack applyEnchantmentsToItem(ItemStack itemStack, List<String> enchantmentList, boolean hideEnchantments) {
+    private static ItemStack applyEnchantmentsToItem(ItemStack itemStack, List<String> enchantmentList, boolean hideEnchantments) {
         List<Enchantment> enchantments = new ArrayList<>();
 
         for (String enchantStr : enchantmentList) {
@@ -252,7 +258,7 @@ public  record MenuLoader(ConfigManager configManager) {
     }
 
     // 检查视图要求
-    private boolean checkViewRequirement(MenuConfig.MenuItemConfig config, ServerPlayer player) {
+    private static boolean checkViewRequirement(MenuConfig.MenuItemConfig config, ServerPlayer player) {
         Map<String, Map<String, String>> requirements = config.getRequirements();
         // 如果没有配置条件，直接显示
         if (requirements == null || requirements.isEmpty()) {
@@ -364,7 +370,7 @@ public  record MenuLoader(ConfigManager configManager) {
         return true;
     }
 
-    public Map<String, String> getRegisteredCommands() {
+    public static Map<String, String> getRegisteredCommands() {
         Map<String, String> commands = new HashMap<>();
         for (Map.Entry<String, MenuConfig> entry : configManager.menus.entrySet()) {
             String menuName = entry.getKey();
@@ -378,7 +384,7 @@ public  record MenuLoader(ConfigManager configManager) {
 
 
     // 处理命令
-    private void handleCommands(List<String> commands, ServerPlayer player) {
+    private static void handleCommands(List<String> commands, ServerPlayer player) {
         for (String command : commands) {
             if (command.startsWith("[refresh]")) {
                 String menuName = ChestMenu.getOpenMenu(player).getMenuName();
@@ -400,7 +406,7 @@ public  record MenuLoader(ConfigManager configManager) {
         }
     }
 
-    private void executeCommand(ServerPlayer player, String command) {
+    private static void executeCommand(ServerPlayer player, String command) {
         try {
             Sponge.server().commandManager().process(player, command);
         } catch (CommandException e) {
@@ -408,7 +414,7 @@ public  record MenuLoader(ConfigManager configManager) {
         }
     }
 
-    private void executeConsoleCommand(String command) {
+    private static void executeConsoleCommand(String command) {
         try {
             Sponge.server().commandManager().process(command);
         } catch (CommandException e) {

@@ -2,6 +2,7 @@ package cn.lelmc.lelmenu.commands;
 
 import cn.lelmc.lelmenu.Lelmenus;
 import cn.lelmc.lelmenu.menus.ChestMenu;
+import cn.lelmc.lelmenu.menus.MenuLoader;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -23,7 +24,7 @@ public class MenusCommand {
         // 加载所有菜单配置
         lelmenus.configManager.loadMenus();
         // 获取需要注册的命令
-        Map<String, String> commandsToRegister = lelmenus.menuLoader.getRegisteredCommands();
+        Map<String, String> commandsToRegister = MenuLoader.getRegisteredCommands();
 
         // 注册固定命令
         registerFixedCommands(event);
@@ -49,7 +50,7 @@ public class MenusCommand {
                 .executor(ctx -> {
                     if (ctx.cause().audience() instanceof ServerPlayer player) {
                         final String menuName = ctx.one(menuParam).orElse("main");
-                        final ChestMenu menu = lelmenus.menuLoader.loadMenu(menuName, player);
+                        final ChestMenu menu = MenuLoader.loadMenu(menuName, player);
                         if (menu != null) {
                             menu.open(player);
                         } else {
@@ -80,7 +81,7 @@ public class MenusCommand {
                     .permission("lelmenu.use")
                     .executor(ctx -> {
                         if (ctx.cause().audience() instanceof ServerPlayer player) {
-                            final ChestMenu menu = lelmenus.menuLoader.loadMenu(menuName, player);
+                            final ChestMenu menu = MenuLoader.loadMenu(menuName, player);
                             if (menu != null) {
                                 menu.open(player);
                             } else {
@@ -100,7 +101,7 @@ public class MenusCommand {
         lelmenus.configManager.reload();
 
         // 获取新的命令映射
-        Map<String, String> newCommandMapping = lelmenus.menuLoader.getRegisteredCommands();
+        Map<String, String> newCommandMapping = MenuLoader.getRegisteredCommands();
 
         // 发送重载成功消息
         ctx.sendMessage(Identity.nil(), Component.text("Menu has been successfully reloaded!", NamedTextColor.GREEN));

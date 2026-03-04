@@ -498,14 +498,14 @@ nbt_form {
 - `<player_remaining_air>` - Remaining air
 
 #### Held Items
-- `<player_item_in_main_hand>` - Main hand item name
-- `<player_item_in_off_hand>` - Off hand item name
+- `<player_hand_main>` - Main hand item name
+- `<player_hand_off>` - Off hand item name
 
 #### Time Statistics
-- `<player_time_played_seconds>` - Play time (seconds)
-- `<player_time_played_minutes>` - Play time (minutes)
-- `<player_time_played_hours>` - Play time (hours)
-- `<player_time_played_days>` - Play time (days)
+- `<player_time_seconds>` - Play time (seconds)
+- `<player_time_minutes>` - Play time (minutes)
+- `<player_time_hours>` - Play time (hours)
+- `<player_time_days>` - Play time (days)
 - `<player_time_played>` - Play time (formatted, e.g., "1 d 2 h 30 m")
 - `<player_first_join>` - First join time
 

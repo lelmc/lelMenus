@@ -489,14 +489,14 @@ nbt_form {
 - `<player_remaining_air>` - 剩余空气值
 
 #### 手持物品
-- `<player_item_in_main_hand>` - 主手物品名称
-- `<player_item_in_off_hand>` - 副手物品名称
+- `<player_hand_main>` - 主手物品名称
+- `<player_hand_off>` - 副手物品名称
 
 #### 时间统计
-- `<player_time_played_seconds>` - 游戏时间 (秒)
-- `<player_time_played_minutes>` - 游戏时间 (分钟)
-- `<player_time_played_hours>` - 游戏时间 (小时)
-- `<player_time_played_days>` - 游戏时间 (天)
+- `<player_time_seconds>` - 游戏时间 (秒)
+- `<player_time_minutes>` - 游戏时间 (分钟)
+- `<player_time_hours>` - 游戏时间 (小时)
+- `<player_time_days>` - 游戏时间 (天)
 - `<player_time_played>` - 游戏时间 (格式化输出，如 "1 d 2 h 30 m")
 - `<player_first_join>` - 首次加入时间
 
