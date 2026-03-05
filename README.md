@@ -6,7 +6,7 @@ A chest menu plugin based on SpongeAPI 12, inspired by DeluxeMenus functionality
 
 ## 🌏 Language / 语言
 
-- **[🇨🇳 中文版 README](README-Zh_CN.md)** - 中文说明文档
+- **[🇨🇳 中文版 README](README-zh_CN.md)** - 中文说明文档
 - **[🇬🇧 English README](README.md)** - You are here
 
 ---
@@ -74,7 +74,7 @@ rows = 3
 # Command to open this menu (optional, delete if not needed)
 open_command = "main"
 
-# Menu update interval in seconds (optional, delete if not needed)
+# Menu update interval (seconds), will update slots with "update=true" (optional, delete if not needed)
 update_interval = 5
 
 # Menu title (supports color codes and placeholders)
@@ -124,14 +124,27 @@ items {
       "[console] say Hello"
     ]
     
+    shift_left_click_commands=[
+      "[close]",
+      "[message] shift_left_click_commands"
+    ]
+    
+    shift_right_click_commands=[
+      "[close]",
+      "[message] shift_right_click_commands"
+    ]
+    
+    middle_click_requirement=[
+      "[close]",
+      "[message] middle_click_requirement"
+    ]
+    
     # View requirements (only shows when conditions met) (optional)
-    view_requirement {
-      requirements {
-        "check_level" {
-          type = ">="
-          input = "%player_level%"
-          output = "10"
-        }
+    requirements {
+      "check_level" {
+        type = ">="
+        input = "%player_level%"
+        output = "10"
       }
     }
     
@@ -142,6 +155,8 @@ items {
     nbt_string {
       "CustomModelData" = "12345"
     }
+    # This slot will be updated
+    update=true
   }
   
   # Multiple slots configuration (borders, etc.)

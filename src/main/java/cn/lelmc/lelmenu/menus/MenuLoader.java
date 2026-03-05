@@ -89,15 +89,15 @@ public class MenuLoader {
                 // 设置点击事件
                 menu.setAction(slot, clickType -> {
                     if (clickType.equals(ClickTypes.SHIFT_CLICK_LEFT.get())) {
-                        handleCommands(itemConfig.getShiftLeftClickCommands(), player);
+                        handleCommands(itemConfig.getShiftLeftClickCommands(), player, menu);
                     } else if (clickType.equals(ClickTypes.SHIFT_CLICK_RIGHT.get())) {
-                        handleCommands(itemConfig.getShiftRightClickCommands(), player);
+                        handleCommands(itemConfig.getShiftRightClickCommands(), player, menu);
                     } else if (clickType.equals(ClickTypes.CLICK_LEFT.get())) {
-                        handleCommands(itemConfig.getLeftClickCommands(), player);
+                        handleCommands(itemConfig.getLeftClickCommands(), player, menu);
                     } else if (clickType.equals(ClickTypes.CLICK_RIGHT.get())) {
-                        handleCommands(itemConfig.getRightClickCommands(), player);
+                        handleCommands(itemConfig.getRightClickCommands(), player, menu);
                     } else if (clickType.equals(ClickTypes.CLICK_MIDDLE.get())) {
-                        handleCommands(itemConfig.getMiddleClickCommands(), player);
+                        handleCommands(itemConfig.getMiddleClickCommands(), player, menu);
                     }
                 });
             }
@@ -185,6 +185,17 @@ public class MenuLoader {
                 .quantity(config.getCount())
                 .build();
 
+        ItemStack itemStack = updateItemDisplay(config, player, stack);
+
+        // 处理附魔
+        if (!config.getEnchantments().isEmpty()) {
+            itemStack = applyEnchantmentsToItem(itemStack, config.getEnchantments(), config.isHideEnchantments());
+        }
+
+        return itemStack;
+    }
+
+    public static ItemStack updateItemDisplay(MenuConfig.MenuItemConfig config, ServerPlayer player, ItemStack stack) {
         // 解析显示名称
         String displayName = Placeholder.parseString(config.getDisplayName(), player);
         Component displayComponent = ColorUtils.toComponent(displayName);
@@ -200,12 +211,6 @@ public class MenuLoader {
             List<Component> loreComponents = ColorUtils.toComponentList(Arrays.asList(loreArray));
             stack.offer(Keys.LORE, loreComponents);
         }
-
-        // 处理附魔
-        if (!config.getEnchantments().isEmpty()) {
-            stack = applyEnchantmentsToItem(stack, config.getEnchantments(), config.isHideEnchantments());
-        }
-
         return stack;
     }
 
@@ -379,13 +384,12 @@ public class MenuLoader {
 
 
     // 处理命令
-    private static void handleCommands(List<String> commands, ServerPlayer player) {
+    private static void handleCommands(List<String> commands, ServerPlayer player, ChestMenu menu) {
         for (String command : commands) {
             if (command.startsWith("[refresh]")) {
-                ChestMenu openMenu = ChestMenu.getOpenMenu(player);
-                openMenu.refreshMenu(player);
+                menu.refreshMenu(player);
             } else if (command.startsWith("[close]")) {
-                ChestMenu.closeMenu(player);
+                player.closeInventory();
             } else if (command.startsWith("[player]")) {
                 String cmd = command.substring(8).trim();
                 cmd = Placeholder.parseString(cmd, player);

@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.*;
 import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
@@ -17,12 +16,10 @@ import org.spongepowered.plugin.PluginContainer;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class ChestMenu {
-    private static final Map<UUID, ChestMenu> openMenus = new HashMap<>();
     private final int rows;
     private final Component title;
     private final Map<Integer, ItemStack> items = new HashMap<>();
@@ -38,30 +35,13 @@ public class ChestMenu {
         this.rows = rows;
     }
 
-    public static void closeMenu(ServerPlayer player) {
-        ChestMenu menu = openMenus.remove(player.uniqueId());
-        if (menu != null && menu.updateTask != null) {
-            menu.updateTask.cancel();
-        }
-        player.closeInventory();
-    }
-
-    public static boolean hasMenuOpen(ServerPlayer player) {
-        return openMenus.containsKey(player.uniqueId());
-    }
-
-    public static ChestMenu getOpenMenu(ServerPlayer player) {
-        return openMenus.get(player.uniqueId());
-    }
-
     public void refreshMenu(ServerPlayer player) {
         ChestMenu newMenu = MenuLoader.loadMenu(menuName, player);
         if (newMenu == null) {
             return;
         }
         newMenu.items.forEach((slot, itemStack) -> inventory
-                .slot(slot)
-                .ifPresent(slotObj -> slotObj.set(itemStack)));
+                .slot(slot).ifPresent(slotObj -> slotObj.set(itemStack)));
     }
 
     public void putUpdateItem(int slot, MenuConfig.MenuItemConfig item) {
@@ -106,12 +86,10 @@ public class ChestMenu {
             items.forEach((slot, itemStack) ->
                     inventory.slot(slot).ifPresent(slotObj ->
                             slotObj.set(itemStack)));
-
             // 注册点击处理器
             menu.registerSlotClick(new MenuClickHandler(Lelmenus.instance.container, menu, inventory, player, clickActions));
             // 打开菜单
             menu.open(player);
-            openMenus.put(player.uniqueId(), this);
 
             menu.registerClose((cause, container) -> updateTask.cancel());
             // 设置自动更新任务
@@ -125,18 +103,30 @@ public class ChestMenu {
     }
 
     private void startUpdateTask(ServerPlayer player) {
+        if (updateTask != null) {
+            updateTask.cancel();
+            updateTask = null;
+        }
         updateTask = Sponge.server().scheduler().executor(Lelmenus.instance.container)
-                .scheduleAtFixedRate(() -> {
-                    boolean isMain = Sponge.server().onMainThread();
-                    System.out.println("isMain: " + isMain);
-                    try (CauseStackManager.StackFrame frame = Sponge.server().causeStackManager().pushCauseFrame()) {
-                        frame.pushCause(Lelmenus.instance.container);
-                        updateItems.forEach((slot, item) -> {
-                            ItemStack itemStack = MenuLoader.createItemStack(item, player);
-                            inventory.slot(slot).ifPresent(slotObj -> slotObj.set(itemStack));
-                        });
-                    }
-                }, updateInterval, updateInterval, TimeUnit.SECONDS).task();
+                .scheduleAtFixedRate(() -> updateItems
+                        .forEach((slot, item) -> inventory
+                                .slot(slot)
+                                .ifPresent(slotObj -> {
+                                    ItemStack peek = MenuLoader.updateItemDisplay(item, player, slotObj.peek());
+                                    updateSlotWithMarkDirty(slot, peek);
+                                })), updateInterval, updateInterval, TimeUnit.SECONDS).task();
+    }
+
+    private void updateSlotWithMarkDirty(int slot, ItemStack newStack) {
+        inventory.slot(slot).ifPresent(slotObj -> {
+            try {
+                slotObj.set(newStack);
+                Object fabricSlot = slotObj.getClass().getMethod("inventoryAdapter$getFabric").invoke(slotObj);
+                fabricSlot.getClass().getMethod("fabric$markDirty").invoke(fabricSlot);
+            } catch (Exception e) {
+                Lelmenus.instance.logger.error("无法调用 markDirty", e);
+            }
+        });
     }
 
     private ContainerType getContainerTypeForRows(int rows) {

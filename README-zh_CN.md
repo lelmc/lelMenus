@@ -65,7 +65,7 @@ rows = 3
 # 打开此菜单的命令 (可选，不需要可删除)
 open_command = "main"
 
-# 菜单更新间隔 (秒) (可选，不需要可删除)
+# 菜单更新间隔 (秒),刷新所有'update=true'的物品 (可选，不需要可删除)
 update_interval = 5
 
 # 菜单标题 (支持颜色代码和占位符)
@@ -114,15 +114,24 @@ items {
     right_click_commands = [
       "[console] say Hello"
     ]
-    
+    shift_left_click_commands=[
+      "[close]",
+      "[message] shift_left_click_commands"
+    ]
+    shift_right_click_commands=[
+      "[close]",
+      "[message] shift_right_click_commands"
+    ]
+    middle_click_requirement=[
+      "[close]",
+      "[message] middle_click_requirement"
+    ]
     # 显示要求 (只有满足条件才显示) (可选，不需要可删除)
-    view_requirement {
-      requirements {
-        "check_level" {
-          type = ">="
-          input = "%player_level%"
-          output = "10"
-        }
+    requirements {
+      "check_level" {
+        type = ">="
+        input = "%player_level%"
+        output = "10"
       }
     }
     
@@ -133,6 +142,9 @@ items {
     nbt_string {
       "CustomModelData" = "12345"
     }
+    
+    # 是否更新 (可选，不需要可删除)
+    update=true
   }
   
   # 多个槽位配置 (边框等)
