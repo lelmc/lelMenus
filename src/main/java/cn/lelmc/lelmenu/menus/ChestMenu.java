@@ -71,29 +71,29 @@ public class ChestMenu {
     public void open(ServerPlayer player) {
         try {
             ContainerType containerType = getContainerTypeForRows(rows);
-            inventory = ViewableInventory.builder()
+            this.inventory = ViewableInventory.builder()
                     .type(containerType)
                     .completeStructure()
                     .carrier(player)
                     .plugin(Lelmenus.instance.container)
                     .build();
 
-            InventoryMenu menu = inventory.asMenu();
+            InventoryMenu menu = this.inventory.asMenu();
             menu.setReadOnly(true);
             menu.setTitle(title);
 
             // 填充物品
-            items.forEach((slot, itemStack) ->
-                    inventory.slot(slot).ifPresent(slotObj ->
+            this.items.forEach((slot, itemStack) ->
+                    this.inventory.slot(slot).ifPresent(slotObj ->
                             slotObj.set(itemStack)));
             // 注册点击处理器
-            menu.registerSlotClick(new MenuClickHandler(Lelmenus.instance.container, menu, inventory, player, clickActions));
+            menu.registerSlotClick(new MenuClickHandler(Lelmenus.instance.container, menu, this.inventory, player, clickActions));
             // 打开菜单
             menu.open(player);
 
             menu.registerClose((cause, container) -> updateTask.cancel());
             // 设置自动更新任务
-            if (updateInterval > 0) {
+            if (updateInterval > 0 && !updateItems.isEmpty()) {
                 startUpdateTask(player);
             }
 
@@ -118,7 +118,7 @@ public class ChestMenu {
     }
 
     private void updateSlotWithMarkDirty(int slot, ItemStack newStack) {
-        inventory.slot(slot).ifPresent(slotObj -> {
+        this.inventory.slot(slot).ifPresent(slotObj -> {
             try {
                 slotObj.set(newStack);
                 Object fabricSlot = slotObj.getClass().getMethod("inventoryAdapter$getFabric").invoke(slotObj);
@@ -157,9 +157,9 @@ public class ChestMenu {
                 if (action != null) {
                     action.accept(clickType);
                 }
-                return false; // 取消事件，防止物品被移动
+                return false;
             }
-            return true; // 允许其他操作
+            return true;
         }
     }
 }

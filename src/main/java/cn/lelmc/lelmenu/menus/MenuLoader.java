@@ -2,16 +2,20 @@ package cn.lelmc.lelmenu.menus;
 
 import cn.lelmc.lelmenu.Lelmenus;
 import cn.lelmc.lelmenu.utils.ColorUtils;
+import cn.lelmc.lelmenu.utils.NbtBuilder;
 import cn.lelmc.lelmenu.utils.Placeholder;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
@@ -19,13 +23,19 @@ import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.configurate.ConfigurationNode;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MenuLoader {
 
     public static ConfigManager configManager;
+
+    static Pattern DELAY_PATTERN = Pattern.compile("^\\[delay;(\\d+)([tms]*)]");
 
     public static void setConfigManager(ConfigManager configManager) {
         MenuLoader.configManager = configManager;
@@ -36,6 +46,11 @@ public class MenuLoader {
         if (config == null) {
             return null;
         }
+
+        if (checkViewRequirement(config.getRequirements(), player)) {
+            return null;
+        }
+
         ChestMenu menu = new ChestMenu(config.getMenuTitle(), config.getRows());
         menu.setMenuName(menuName);
         menu.setUpdateInterval(config.getUpdateInterval());
@@ -50,7 +65,7 @@ public class MenuLoader {
 
         // 先处理所有物品，确定每个槽位最终显示哪个（按最高优先级）
         for (MenuConfig.MenuItemConfig itemConfig : sortedItems) {
-            if (!checkViewRequirement(itemConfig, player)) {
+            if (checkViewRequirement(itemConfig.getRequirements(), player)) {
                 continue;
             }
 
@@ -122,60 +137,67 @@ public class MenuLoader {
         // 创建 components 视图
         DataQuery dataQuery = DataQuery.of("components");
         DataView dataView = container.createView(dataQuery);
-        // 处理简单的 nbtString
-        if (config.getNbtString() != null) {
-            for (Map.Entry<String, String> entry : config.getNbtString().entrySet()) {
-                String value = Placeholder.parseString(entry.getValue(), player);
-                dataView.set(DataQuery.of(entry.getKey()), value);
-            }
+        DataView view = dataView.createView(DataQuery.of("minecraft:custom_data"));
+
+        // nbtString
+        for (Map.Entry<String, String> entry : config.getNbtString().entrySet()) {
+            String value = Placeholder.parseString(entry.getValue(), player);
+            view.set(DataQuery.of(entry.getKey()), value);
         }
 
-        // 处理 nbtInt
+        // nbtInt
         for (Map.Entry<String, Integer> entry : config.getNbtInt().entrySet()) {
-            dataView.set(DataQuery.of(entry.getKey()), entry.getValue());
+            String value = Placeholder.parseString(String.valueOf(entry.getValue()), player);
+            view.set(DataQuery.of(entry.getKey()), Integer.valueOf(value));
         }
 
-        // 处理 nbtDouble
+        // nbtDouble
         for (Map.Entry<String, Double> entry : config.getNbtDouble().entrySet()) {
-            dataView.set(DataQuery.of(entry.getKey()), entry.getValue());
+            String value = Placeholder.parseString(String.valueOf(entry.getValue()), player);
+            view.set(DataQuery.of(entry.getKey()), Double.valueOf(value));
         }
 
-        // 处理 nbtFloat
+        // nbtFloat
         for (Map.Entry<String, Float> entry : config.getNbtFloat().entrySet()) {
-            dataView.set(DataQuery.of(entry.getKey()), entry.getValue());
+            String value = Placeholder.parseString(String.valueOf(entry.getValue()), player);
+            view.set(DataQuery.of(entry.getKey()), Float.valueOf(value));
         }
 
+        // 处理 nbtForm
         if (config.getNbtForm() != null) {
             ConfigurationNode nbtFormNode = config.getNbtForm();
-            // 检查是否有有效数据
             if (!nbtFormNode.virtual() && !nbtFormNode.childrenMap().isEmpty()) {
                 for (Map.Entry<Object, ? extends ConfigurationNode> entry : nbtFormNode.childrenMap().entrySet()) {
                     String componentKey = entry.getKey().toString();
                     ConfigurationNode componentNode = entry.getValue();
 
-                    // 创建组件子视图
                     DataView componentView = dataView.createView(DataQuery.of(componentKey));
+                    NbtBuilder nbtBuilder = new NbtBuilder();
 
-                    // 遍历组件内的所有属性
                     for (Map.Entry<Object, ? extends ConfigurationNode> propEntry : componentNode.childrenMap().entrySet()) {
                         String propertyKey = propEntry.getKey().toString();
                         ConfigurationNode propertyNode = propEntry.getValue();
 
-                        // 根据节点类型获取值
-                        if (propertyNode.isList()) {
-                            List<String> list = new ArrayList<>();
-                            for (ConfigurationNode item : propertyNode.childrenList()) {
-                                String s = Placeholder.parseString(item.getString(""), player);
-                                list.add(s);
+                        Object rawValue = propertyNode.raw();
+                        switch (rawValue) {
+                            case null -> {
                             }
-                            componentView.set(DataQuery.of(propertyKey), list);
-                        } else {
-                            Object value = propertyNode.raw();
-                            if (value != null) {
-                                componentView.set(DataQuery.of(propertyKey), value);
+                            case String strValue -> {
+                                if (strValue.startsWith("<") && strValue.endsWith(">")) {
+                                    nbtBuilder.setPlaceholder(propertyKey, strValue, NbtBuilder.ValueType.AUTO);
+                                } else {
+                                    nbtBuilder.set(propertyKey, strValue);
+                                }
                             }
+                            case Integer i -> nbtBuilder.set(propertyKey, i);
+                            case Double v -> nbtBuilder.set(propertyKey, v);
+                            case Boolean b -> nbtBuilder.set(propertyKey, b);
+                            case Long l -> nbtBuilder.set(propertyKey, l.intValue());
+                            default -> nbtBuilder.set(propertyKey, rawValue.toString());
                         }
+
                     }
+                    nbtBuilder.build(componentView, player);
                 }
             }
         }
@@ -258,11 +280,9 @@ public class MenuLoader {
     }
 
     // 检查视图要求
-    private static boolean checkViewRequirement(MenuConfig.MenuItemConfig config, ServerPlayer player) {
-        Map<String, Map<String, String>> requirements = config.getRequirements();
-        // 如果没有配置条件，直接显示
+    private static boolean checkViewRequirement(Map<String, Map<String, String>> requirements, ServerPlayer player) {
         if (requirements == null || requirements.isEmpty()) {
-            return true;
+            return false;
         }
 
         for (Map.Entry<String, Map<String, String>> entry : requirements.entrySet()) {
@@ -282,7 +302,7 @@ public class MenuLoader {
                 // 字符串相等判断
                 case "equals":
                     if (!inputStr.equals(outputStr)) {
-                        return false;
+                        return true;
                     }
                     break;
                 case ">":
@@ -290,10 +310,10 @@ public class MenuLoader {
                         double inputNum = Double.parseDouble(inputStr);
                         double outputNum = Double.parseDouble(outputStr);
                         if (!(inputNum > outputNum)) {
-                            return false;
+                            return true;
                         }
                     } catch (NumberFormatException e) {
-                        return false;
+                        return true;
                     }
                     break;
                 case ">=":
@@ -301,10 +321,10 @@ public class MenuLoader {
                         double inputNum = Double.parseDouble(inputStr);
                         double outputNum = Double.parseDouble(outputStr);
                         if (!(inputNum >= outputNum)) {
-                            return false;
+                            return true;
                         }
                     } catch (NumberFormatException e) {
-                        return false;
+                        return true;
                     }
                     break;
                 case "<":
@@ -312,10 +332,10 @@ public class MenuLoader {
                         double inputNum = Double.parseDouble(inputStr);
                         double outputNum = Double.parseDouble(outputStr);
                         if (!(inputNum < outputNum)) {
-                            return false;
+                            return true;
                         }
                     } catch (NumberFormatException e) {
-                        return false;
+                        return true;
                     }
                     break;
                 case "<=":
@@ -323,10 +343,10 @@ public class MenuLoader {
                         double inputNum = Double.parseDouble(inputStr);
                         double outputNum = Double.parseDouble(outputStr);
                         if (!(inputNum <= outputNum)) {
-                            return false;
+                            return true;
                         }
                     } catch (NumberFormatException e) {
-                        return false;
+                        return true;
                     }
                     break;
                 case "==":
@@ -334,31 +354,43 @@ public class MenuLoader {
                         double inputNum = Double.parseDouble(inputStr);
                         double outputNum = Double.parseDouble(outputStr);
                         if (inputNum != outputNum) {
-                            return false;
+                            return true;
                         }
                     } catch (NumberFormatException e) {
-                        return false;
+                        return true;
+                    }
+                    break;
+                case "!=":
+                    if (inputStr.equals(outputStr)) {
+                        return true;
                     }
                     break;
 
                 // 字符串包含判断
                 case "contains":
                     if (!inputStr.contains(outputStr)) {
-                        return false;
+                        return true;
                     }
                     break;
 
                 // 字符串开头判断
                 case "starts with":
                     if (!inputStr.startsWith(outputStr)) {
-                        return false;
+                        return true;
                     }
                     break;
 
                 // 字符串结尾判断
                 case "ends with":
                     if (!inputStr.endsWith(outputStr)) {
-                        return false;
+                        return true;
+                    }
+                    break;
+
+                case "permission":
+                    boolean b = Boolean.parseBoolean(output);
+                    if (player.hasPermission(input) != b) {
+                        return true;
                     }
                     break;
 
@@ -367,7 +399,7 @@ public class MenuLoader {
                     break;
             }
         }
-        return true;
+        return false;
     }
 
     public static Map<String, String> getRegisteredCommands() {
@@ -382,42 +414,69 @@ public class MenuLoader {
         return commands;
     }
 
-
     // 处理命令
     private static void handleCommands(List<String> commands, ServerPlayer player, ChestMenu menu) {
-        for (String command : commands) {
-            if (command.startsWith("[refresh]")) {
-                menu.refreshMenu(player);
-            } else if (command.startsWith("[close]")) {
-                player.closeInventory();
-            } else if (command.startsWith("[player]")) {
-                String cmd = command.substring(8).trim();
-                cmd = Placeholder.parseString(cmd, player);
-                executeCommand(player, cmd);
-            } else if (command.startsWith("[console]")) {
-                String cmd = command.substring(9).trim();
-                cmd = Placeholder.parseString(cmd, player);
-                executeConsoleCommand(cmd);
-            } else if (command.startsWith("[message]")) {
-                String msg = command.substring(9).trim();
-                player.sendMessage(Component.text(Placeholder.parseString(msg, player)));
-            }
+        if (commands == null || commands.isEmpty()) return;
+        processCommands(commands, 0, player, menu);
+    }
+
+    private static void processCommands(List<String> commands, int index, ServerPlayer player, ChestMenu menu) {
+        if (index >= commands.size()) return;
+
+        String command = commands.get(index);
+        Matcher delayMatcher = DELAY_PATTERN.matcher(command);
+
+        if (delayMatcher.matches()) {
+            long delayTicks = Long.parseLong(delayMatcher.group(1));
+            Sponge.server().scheduler().submit(Task.builder()
+                    .execute(() -> processCommands(commands, index + 1, player, menu))
+                    .delay(Ticks.of(delayTicks))
+                    .plugin(Lelmenus.instance.container)
+                    .build());
+        } else {
+            executeCommand(command, player, menu);
+            processCommands(commands, index + 1, player, menu);
+        }
+    }
+
+    private static void executeCommand(String command, ServerPlayer player, ChestMenu menu) {
+        if (command.startsWith("[refresh]")) {
+            menu.refreshMenu(player);
+        } else if (command.startsWith("[close]")) {
+            player.closeInventory();
+        } else if (command.startsWith("[player]")) {
+            String cmd = command.substring(8).trim();
+            cmd = Placeholder.parseString(cmd, player);
+            executeCommand(player, cmd);
+        } else if (command.startsWith("[console]")) {
+            String cmd = command.substring(9).trim();
+            cmd = Placeholder.parseString(cmd, player);
+            executeConsoleCommand(cmd);
+        } else if (command.startsWith("[message]")) {
+            String msg = command.substring(9).trim();
+            player.sendMessage(Component.text(Placeholder.parseString(msg, player)));
         }
     }
 
     private static void executeCommand(ServerPlayer player, String command) {
-        try {
-            Sponge.server().commandManager().process(player, command);
+        try (CauseStackManager.StackFrame frame = Sponge.server().causeStackManager().pushCauseFrame()) {
+            frame.pushCause(player);
+            frame.addContext(EventContextKeys.PLAYER, player);
+            frame.addContext(EventContextKeys.SUBJECT, player);
+            frame.addContext(EventContextKeys.AUDIENCE, player);
+            Sponge.server().commandManager().process(command);
         } catch (CommandException e) {
-            // 忽略命令异常
+            System.out.println(e.getMessage());
         }
     }
 
     private static void executeConsoleCommand(String command) {
         try {
-            Sponge.server().commandManager().process(command);
+            SystemSubject systemSubject = Sponge.systemSubject();
+            Sponge.server().commandManager().process(systemSubject, systemSubject, command);
         } catch (CommandException e) {
-            // 忽略命令异常
+            throw new RuntimeException(e);
         }
     }
+
 }
