@@ -84,9 +84,6 @@ public class ConfigManager {
 
             // 使用对象映射器加载配置
             MenuConfig menuConfig = mapper.load(node);
-            for (MenuConfig.MenuItemConfig item : menuConfig.getItems().values()) {
-                item.parseNbtData();
-            }
 
             menus.put(menuName, menuConfig);
         } catch (ConfigurateException e) {

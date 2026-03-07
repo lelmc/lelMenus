@@ -8,8 +8,6 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.data.persistence.DataQuery;
-import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -23,7 +21,6 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.Optional;
 
 public class NBTCommand {
 
@@ -68,15 +65,12 @@ public class NBTCommand {
         String itemId = itemInHand.type().key(RegistryTypes.ITEM_TYPE).asString();
         int amount = itemInHand.quantity();
 
-        Optional<DataView> components = itemInHand.toContainer().getView(DataQuery.of("components"));
-
         // 构建输出
         StringBuilder output = new StringBuilder();
         output.append("# 物品信息\n");
         output.append("# 类型: ").append(itemId).append("\n");
         output.append("# 数量: ").append(amount).append("\n");
         output.append("# 生成时间: ").append(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)).append("\n\n");
-        output.append("# 数据结构: ").append(components.toString()).append("\n\n");
 
         if ("json".equalsIgnoreCase(format)) {
             output.append(NBTUtils.toJsonString(nbtMap));

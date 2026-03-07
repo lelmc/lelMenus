@@ -70,16 +70,6 @@ update_interval = 5
 
 # 菜单标题 (支持颜色代码和占位符)
 menu_title = "&c&l乐联&7-> &d服务菜单"
-
-# 检查是否满足条件打开菜单 (可选，不需要可删除)
-# 支持多个条件，下面是一个检查权限示例
-requirements {
-  "check_permission" { #这个可以随意命名
-    type = "条件类型"            # "permission"
-    input = "输入值 (支持占位符)"  # "lelmc.user"
-    output = "期望值"  # 期望是true/false   如果期望是true，则拥有这个权限的可以打开，如果期望是false，则没有这个权限的玩家可以打开
-  }
-}
 ```
 
 ### 物品配置
@@ -171,7 +161,6 @@ items {
 
 - `[close]` - 关闭菜单
 - `[refresh]` - 刷新菜单
-- `[delay;50]` - 延迟50 tick 在执行下面出现的命令
 - `[player] 命令` - 以玩家身份执行命令
 - `[console] 命令` - 以控制台身份执行命令
 - `[message] 消息` - 发送消息给玩家
@@ -215,11 +204,6 @@ items {
 
 ### 支持的比较类型
 
-##### 权限检测
-| 类型           | 说明   | 示例                                   |
-|--------------|------|--------------------------------------|
-| `permission` | 检查权限 | `input="lelmenu.user" , output=true` |
-
 #### 数值比较
 
 | 类型   | 说明         | 示例 |
@@ -232,13 +216,12 @@ items {
 
 ##### 字符串比较
 
-| 类型            | 说明     | 示例                                       |
-|---------------|--------|------------------------------------------|
-| `equals`      | 字符串相等  | `input="<player_world>", output="world"` |
-| `!=`          | 字符串不包含 | `input="<player_name>", output="admin"`  |
-| `contains`    | 字符串包含  | `input="<player_name>", output="admin"`  |
-| `starts with` | 字符串开头  | `input="<player_uuid>", output="abc"`    |
-| `ends with`   | 字符串结尾  | `input="<player_uuid>", output="123"`    |
+| 类型 | 说明 | 示例 |
+|------|------|------|
+| `equals` | 字符串相等 | `input="<player_world>", output="world"` |
+| `contains` | 字符串包含 | `input="<player_name>", output="admin"` |
+| `starts with` | 字符串开头 | `input="<player_uuid>", output="abc"` |
+| `ends with` | 字符串结尾 | `input="<player_uuid>", output="123"` |
 
 #### 配置示例
 

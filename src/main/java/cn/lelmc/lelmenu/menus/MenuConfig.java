@@ -27,9 +27,6 @@ public class MenuConfig {
     @Setting("menu_title")
     private String menuTitle = "&c&l菜单";
 
-    @Setting
-    private Map<String, Map<String, String>> requirements = new HashMap<>();
-
     public int getRows() {
         return rows;
     }
@@ -74,14 +71,6 @@ public class MenuConfig {
         return rows * 9;
     }
 
-    public Map<String, Map<String, String>> getRequirements() {
-        return requirements;
-    }
-
-    public void setRequirements(Map<String, Map<String, String>> requirements) {
-        this.requirements = requirements;
-    }
-
     @ConfigSerializable
     public static class MenuItemConfig {
 
@@ -110,19 +99,19 @@ public class MenuConfig {
         private List<String> enchantments = new ArrayList<>();
 
         @Setting("nbt_int")
-        private ConfigurationNode nbtInt;
+        private Map<String, Integer> nbtInt = new HashMap<>();
 
         @Setting("nbt_string")
-        private ConfigurationNode nbtString;
+        private Map<String, String> nbtString = new HashMap<>();
 
         @Setting("nbt_double")
-        private ConfigurationNode nbtDouble;
+        private Map<String, Double> nbtDouble = new HashMap<>();
 
         @Setting("nbt_float")
-        private ConfigurationNode nbtFloat;
+        private Map<String, Float> nbtFloat = new HashMap<>();
 
         @Setting("nbt_form")
-        private ConfigurationNode nbtForm;
+        private ConfigurationNode nbtForm;  // 直接使用 ConfigurationNode
 
 
         @Setting
@@ -148,121 +137,6 @@ public class MenuConfig {
 
         @Setting
         private int priority = 0;
-        
-        // 临时存储解析后的 NBT 数据
-        private transient Map<String, Integer> parsedNbtInt = new HashMap<>();
-        private transient Map<String, String> parsedNbtString = new HashMap<>();
-        private transient Map<String, Double> parsedNbtDouble = new HashMap<>();
-        private transient Map<String, Float> parsedNbtFloat = new HashMap<>();
-
-        // 解析 NBT 数据的方法
-        public void parseNbtData() {
-            parseNbtInt();
-            parseNbtString();
-            parseNbtDouble();
-            parseNbtFloat();
-        }
-
-        private void parseNbtInt() {
-            parsedNbtInt.clear();
-            if (nbtInt == null || nbtInt.virtual()) return;
-
-            if (nbtInt.isMap()) {
-                for (Map.Entry<Object, ? extends ConfigurationNode> entry : nbtInt.childrenMap().entrySet()) {
-                    String key = entry.getKey().toString();
-                    int value = entry.getValue().getInt();
-                    parsedNbtInt.put(key, value);
-                }
-            } else {
-                ConfigurationNode parent = nbtInt.parent();
-                if (parent != null) {
-                    for (Map.Entry<Object, ? extends ConfigurationNode> entry : parent.childrenMap().entrySet()) {
-                        String key = entry.getKey().toString();
-                        if (!key.equals("nbt_int") && entry.getValue() == nbtInt) {
-                            parsedNbtInt.put(key, nbtInt.getInt());
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void parseNbtString() {
-            parsedNbtString.clear();
-            if (nbtString == null || nbtString.virtual()) return;
-
-            if (nbtString.isMap()) {
-                // 多值格式
-                for (Map.Entry<Object, ? extends ConfigurationNode> entry : nbtString.childrenMap().entrySet()) {
-                    String key = entry.getKey().toString();
-                    String value = entry.getValue().getString("");
-                    parsedNbtString.put(key, value);
-                }
-            } else {
-                ConfigurationNode parent = nbtString.parent();
-                if (parent != null) {
-                    for (Map.Entry<Object, ? extends ConfigurationNode> entry : parent.childrenMap().entrySet()) {
-                        String key = entry.getKey().toString();
-                        if (!key.equals("nbt_string") && entry.getValue() == nbtString) {
-                            parsedNbtString.put(key, nbtString.getString(""));
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void parseNbtDouble() {
-            parsedNbtDouble.clear();
-            if (nbtDouble == null || nbtDouble.virtual()) return;
-
-            if (nbtDouble.isMap()) {
-                // 多值格式
-                for (Map.Entry<Object, ? extends ConfigurationNode> entry : nbtDouble.childrenMap().entrySet()) {
-                    String key = entry.getKey().toString();
-                    double value = entry.getValue().getDouble();
-                    parsedNbtDouble.put(key, value);
-                }
-            } else {
-                // 单值格式
-                ConfigurationNode parent = nbtDouble.parent();
-                if (parent != null) {
-                    for (Map.Entry<Object, ? extends ConfigurationNode> entry : parent.childrenMap().entrySet()) {
-                        String key = entry.getKey().toString();
-                        if (!key.equals("nbt_double") && entry.getValue() == nbtDouble) {
-                            parsedNbtDouble.put(key, nbtDouble.getDouble());
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void parseNbtFloat() {
-            parsedNbtFloat.clear();
-            if (nbtFloat == null || nbtFloat.virtual()) return;
-
-            if (nbtFloat.isMap()) {
-                // 多值格式
-                for (Map.Entry<Object, ? extends ConfigurationNode> entry : nbtFloat.childrenMap().entrySet()) {
-                    String key = entry.getKey().toString();
-                    float value = (float) entry.getValue().getDouble();
-                    parsedNbtFloat.put(key, value);
-                }
-            } else {
-                // 单值格式
-                ConfigurationNode parent = nbtFloat.parent();
-                if (parent != null) {
-                    for (Map.Entry<Object, ? extends ConfigurationNode> entry : parent.childrenMap().entrySet()) {
-                        String key = entry.getKey().toString();
-                        if (!key.equals("nbt_float") && entry.getValue() == nbtFloat) {
-                            parsedNbtFloat.put(key, (float) nbtFloat.getDouble());
-                            break;
-                        }
-                    }
-                }
-            }
-        }
 
         public String getMaterial() {
             return material;
@@ -329,23 +203,35 @@ public class MenuConfig {
         }
 
         public Map<String, Integer> getNbtInt() {
-            return parsedNbtInt;
+            return nbtInt;
+        }
+
+        public void setNbtInt(Map<String, Integer> nbtInt) {
+            this.nbtInt = nbtInt;
         }
 
         public Map<String, String> getNbtString() {
-            return parsedNbtString;
+            return nbtString;
+        }
+
+        public void setNbtString(Map<String, String> nbtString) {
+            this.nbtString = nbtString;
         }
 
         public Map<String, Double> getNbtDouble() {
-            return parsedNbtDouble;
+            return nbtDouble;
+        }
+
+        public void setNbtDouble(Map<String, Double> nbtDouble) {
+            this.nbtDouble = nbtDouble;
         }
 
         public Map<String, Float> getNbtFloat() {
-            return parsedNbtFloat;
+            return nbtFloat;
         }
 
-        public void setNbtInt(ConfigurationNode nbtInt) {
-            this.nbtInt = nbtInt;
+        public void setNbtFloat(Map<String, Float> nbtFloat) {
+            this.nbtFloat = nbtFloat;
         }
 
         public ConfigurationNode getNbtForm() {
