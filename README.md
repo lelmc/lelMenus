@@ -26,7 +26,7 @@ A chest menu plugin based on SpongeAPI 12, inspired by DeluxeMenus functionality
 ### `/menu [menu_name]`
 - **Permission**: `lelmenu.use`
 - **Description**: Open a specific menu
-- **Usage**: 
+- **Usage**:
   - `/menu` - Open main menu
   - `/menu shop` - Open shop menu
 
@@ -38,7 +38,7 @@ A chest menu plugin based on SpongeAPI 12, inspired by DeluxeMenus functionality
 ### Dynamic Menu Commands
 - **Permission**: `lelmenu.use`
 - **Description**: Shortcut commands automatically registered from `open_command` in configuration files
-- **Examples**: 
+- **Examples**:
   - Set `open_command = "cd"` in config → Use `/cd` to open corresponding menu
   - Set `open_command = "shop"` in config → Use `/shop` to open corresponding menu
 
@@ -79,6 +79,15 @@ update_interval = 5
 
 # Menu title (supports color codes and placeholders)
 menu_title = "&c&lLel&7-> &dService Menu"
+
+# Supports multiple conditions, below is a permission check example
+requirements {
+  "check_permission" { #This can be named arbitrarily
+    type = "condition type"            # "permission"
+    input = "input value (supports placeholders)"  # "lelmc.user"
+    output = "expected value"  # Expected true/false. If true, players with this permission can open. If false, players without this permission can open.
+  }
+}
 ```
 
 ### Item Configuration
@@ -173,6 +182,7 @@ items {
 
 - `[close]` - Close menu
 - `[refresh]` - Refresh the current menu
+- `[delay;50]` - Delay 50 ticks before executing the commands that follow
 - `[player] command` - Execute command as player
 - `[console] command` - Execute command as console
 - `[message] message` - Send message to player
@@ -216,6 +226,11 @@ items {
 
 ### Supported Comparison Types
 
+##### Permission Check
+| 类型           | 说明   | 示例                                   |
+|--------------|------|--------------------------------------|
+| `permission` | Check permission | `input="lelmenu.user" , output=true` |
+
 #### Numeric Comparisons
 
 | Type | Description       | Example |
@@ -231,6 +246,7 @@ items {
 | Type | Description | Example |
 |------|-------------|---------|
 | `equals` | String equals | `input="<player_world>", output="world"` |
+| `!=`          | String does not contain | `input="<player_name>", output="admin"`  |
 | `contains` | String contains | `input="<player_name>", output="admin"` |
 | `starts with` | String starts with | `input="<player_uuid>", output="abc"` |
 | `ends with` | String ends with | `input="<player_uuid>", output="123"` |

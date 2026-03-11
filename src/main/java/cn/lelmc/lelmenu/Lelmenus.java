@@ -1,7 +1,7 @@
 package cn.lelmc.lelmenu;
 
 import cn.lelmc.lelmenu.commands.MenusCommand;
-import cn.lelmc.lelmenu.menus.ConfigManager;
+import cn.lelmc.lelmenu.config.ConfigManager;
 import cn.lelmc.lelmenu.menus.MenuLoader;
 import com.google.inject.Inject;
 import org.apache.logging.log4j.Logger;
