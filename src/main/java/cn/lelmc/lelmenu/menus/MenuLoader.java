@@ -9,7 +9,6 @@ import cn.lelmc.lelmenu.utils.Placeholder;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -203,7 +202,6 @@ public class MenuLoader {
                 }
             }
         }
-
         ItemStack stack = ItemStack.builder()
                 .fromContainer(container)
                 .quantity(config.getCount())
@@ -453,7 +451,7 @@ public class MenuLoader {
         } else if (command.startsWith("[console]")) {
             String cmd = command.substring(9).trim();
             cmd = Placeholder.parseString(cmd, player);
-            executeConsoleCommand(cmd);
+            executeConsoleCommand(player, cmd);
         } else if (command.startsWith("[message]")) {
             String msg = command.substring(9).trim();
             player.sendMessage(Component.text(Placeholder.parseString(msg, player)));
@@ -468,16 +466,18 @@ public class MenuLoader {
             frame.addContext(EventContextKeys.AUDIENCE, player);
             Sponge.server().commandManager().process(command);
         } catch (CommandException e) {
-            System.out.println(e.getMessage());
+            Lelmenus.instance.logger.error(e.getMessage());
         }
     }
 
-    private static void executeConsoleCommand(String command) {
+    private static void executeConsoleCommand(ServerPlayer player, String command) {
         try {
-            SystemSubject systemSubject = Sponge.systemSubject();
-            Sponge.server().commandManager().process(systemSubject, systemSubject, command);
+            Sponge.server().commandManager().process(
+                    Sponge.systemSubject(),
+                    player,
+                    command);
         } catch (CommandException e) {
-            throw new RuntimeException(e);
+            Lelmenus.instance.logger.error(e.getMessage());
         }
     }
 
