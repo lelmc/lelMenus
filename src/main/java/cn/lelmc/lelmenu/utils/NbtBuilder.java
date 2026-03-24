@@ -4,7 +4,9 @@ import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class NbtBuilder {
@@ -25,6 +27,10 @@ public class NbtBuilder {
 
     public void set(String key, double value) {
         values.put(key, new NbtValue.DoubleValue(value));
+    }
+
+    public void set(String key, List<?> value) {
+        values.put(key, new NbtValue.ListValue(value));
     }
 
     public void setPlaceholder(String key, String placeholder, ValueType type) {
@@ -90,6 +96,32 @@ public class NbtBuilder {
             @Override
             public void apply(DataView view, String key, ServerPlayer player) {
                 view.set(DataQuery.of(key), value);
+            }
+        }
+
+        class ListValue implements NbtValue<List<?>> {
+            private final List<?> value;
+
+            ListValue(List<?> value) {
+                this.value = value;
+            }
+
+            @Override
+            public void apply(DataView view, String key, ServerPlayer player) {
+                // 处理列表中的占位符
+                List<Object> processedList = new ArrayList<>();
+                for (Object item : value) {
+                    if (item instanceof String str) {
+                        if (str.startsWith("<") && str.endsWith(">")) {
+                            processedList.add(Placeholder.parseString(str, player));
+                        } else {
+                            processedList.add(str);
+                        }
+                    } else {
+                        processedList.add(item);
+                    }
+                }
+                view.set(DataQuery.of(key), processedList);
             }
         }
 

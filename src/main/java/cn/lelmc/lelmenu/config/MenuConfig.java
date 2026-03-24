@@ -150,10 +150,10 @@ public class MenuConfig {
         private int priority = 0;
 
         // 临时存储解析后的 NBT 数据
-        private transient Map<String, Integer> parsedNbtInt = new HashMap<>();
-        private transient Map<String, String> parsedNbtString = new HashMap<>();
-        private transient Map<String, Double> parsedNbtDouble = new HashMap<>();
-        private transient Map<String, Float> parsedNbtFloat = new HashMap<>();
+        private final transient Map<String, Integer> parsedNbtInt = new HashMap<>();
+        private final transient Map<String, String> parsedNbtString = new HashMap<>();
+        private final transient Map<String, Double> parsedNbtDouble = new HashMap<>();
+        private final transient Map<String, Float> parsedNbtFloat = new HashMap<>();
 
         // 解析 NBT 数据的方法
         public void parseNbtData() {

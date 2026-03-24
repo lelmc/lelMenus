@@ -11,13 +11,10 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
-import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.nio.file.Path;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 
 @Plugin("lelmenus")
@@ -50,8 +47,6 @@ public class Lelmenus {
 
     @Listener
     public void onServerStart(StartedEngineEvent<?> event) {
-        // 创建默认配置（如果不存在）
-        configManager.createDefaultConfigsIfNotExists();
         // 加载所有配置
         configManager.loadMenus();
         PlaceholderProvider.registerExpansion();

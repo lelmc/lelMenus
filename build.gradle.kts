@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "cn.lelmc"
-version = "1.4.2"
+version = "1.4.3"
 
 repositories {
     mavenCentral()

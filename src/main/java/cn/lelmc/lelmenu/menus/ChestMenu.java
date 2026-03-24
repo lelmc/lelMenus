@@ -7,7 +7,11 @@ import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.item.inventory.*;
+import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.ContainerType;
+import org.spongepowered.api.item.inventory.ContainerTypes;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
@@ -23,13 +27,13 @@ import java.util.function.Consumer;
 public class ChestMenu {
     private final int rows;
     private final Component title;
-    private final Map<Integer, ItemStack> items = new HashMap<>();
-    private final Map<Integer, Consumer<ClickType<?>>> clickActions = new HashMap<>();
-    private final Map<Integer, MenuConfig.MenuItemConfig> updateItems = new HashMap<>();
     private String menuName;
     private int updateInterval = 0;
     private ScheduledTask updateTask;
     private ViewableInventory inventory;
+    private final Map<Integer, ItemStackSnapshot> items = new HashMap<>();
+    private final Map<Integer, Consumer<ClickType<?>>> clickActions = new HashMap<>();
+    private final Map<Integer, MenuConfig.MenuItemConfig> updateItems = new HashMap<>();
 
     public ChestMenu(String title, int rows) {
         this.title = ColorUtils.toComponent(title);
@@ -61,7 +65,7 @@ public class ChestMenu {
         this.updateInterval = seconds;
     }
 
-    public void setItem(int slot, ItemStack item) {
+    public void setItem(int slot, ItemStackSnapshot item) {
         items.put(slot, item);
     }
 
@@ -92,7 +96,11 @@ public class ChestMenu {
             // 打开菜单
             menu.open(player);
 
-            menu.registerClose((cause, container) -> updateTask.cancel());
+            menu.registerClose((cause, container) -> {
+                if (updateTask != null) {
+                    updateTask.cancel();
+                }
+            });
             // 设置自动更新任务
             if (updateInterval > 0 && !updateItems.isEmpty()) {
                 startUpdateTask(player);
@@ -104,21 +112,17 @@ public class ChestMenu {
     }
 
     private void startUpdateTask(ServerPlayer player) {
-        if (updateTask != null) {
-            updateTask.cancel();
-            updateTask = null;
-        }
         updateTask = Sponge.server().scheduler().executor(Lelmenus.instance.container)
                 .scheduleAtFixedRate(() -> updateItems
                         .forEach((slot, item) -> inventory
                                 .slot(slot)
                                 .ifPresent(slotObj -> {
-                                    ItemStack peek = MenuLoader.updateItemDisplay(item, player, slotObj.peek());
+                                    ItemStackSnapshot peek = MenuLoader.updateItemDisplay(item, player, slotObj.peek());
                                     updateSlotWithMarkDirty(slot, peek);
                                 })), updateInterval, updateInterval, TimeUnit.SECONDS).task();
     }
 
-    private void updateSlotWithMarkDirty(int slot, ItemStack newStack) {
+    private void updateSlotWithMarkDirty(int slot, ItemStackSnapshot newStack) {
         this.inventory.slot(slot).ifPresent(slotObj -> {
             try {
                 slotObj.set(newStack);

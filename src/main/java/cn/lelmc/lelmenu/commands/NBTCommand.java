@@ -77,6 +77,7 @@ public class NBTCommand {
         output.append("# 数量: ").append(amount).append("\n");
         output.append("# 生成时间: ").append(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)).append("\n\n");
         output.append("# 数据结构: ").append(components.toString()).append("\n\n");
+        System.out.println(itemInHand.toContainer());
 
         if ("json".equalsIgnoreCase(format)) {
             output.append(NBTUtils.toJsonString(nbtMap));

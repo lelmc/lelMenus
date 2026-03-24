@@ -51,6 +51,9 @@ public class ConfigManager {
     }
 
     public void createDefaultConfigsIfNotExists() {
+        if (Files.exists(configDir)) {
+            return;
+        }
         Path configFile = configDir.resolve("main.conf");
         if (!Files.exists(configFile)) {
             createDefaultConfigs();
@@ -60,7 +63,7 @@ public class ConfigManager {
 
     // 加载所有菜单配置
     public void loadMenus() {
-        // 加载所有 .conf 文件
+        createDefaultConfigsIfNotExists();
         try (Stream<Path> pathStream = Files.list(configDir)) {
             pathStream
                     .filter(path -> path.toString().endsWith(".conf"))

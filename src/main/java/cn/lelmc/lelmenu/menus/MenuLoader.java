@@ -22,6 +22,7 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.Task;
@@ -36,6 +37,8 @@ public class MenuLoader {
 
     public static ConfigManager configManager;
 
+    public static final DataQuery COMPONENTS = DataQuery.of("components");
+    public static final DataQuery CUSTOM_DATA = DataQuery.of("minecraft:custom_data");
     static Pattern DELAY_PATTERN = Pattern.compile("^\\[delay;(\\d+)([tms]*)]");
 
     public static void setConfigManager(ConfigManager configManager) {
@@ -51,8 +54,8 @@ public class MenuLoader {
         if (checkViewRequirement(config.getRequirements(), player)) {
             return null;
         }
-
-        ChestMenu menu = new ChestMenu(config.getMenuTitle(), config.getRows());
+        String menuTitle = Placeholder.parseString(config.getMenuTitle(), player);
+        ChestMenu menu = new ChestMenu(menuTitle, config.getRows());
         menu.setMenuName(menuName);
         menu.setUpdateInterval(config.getUpdateInterval());
 
@@ -99,9 +102,9 @@ public class MenuLoader {
             if (itemConfig.isUpdate()) {
                 menu.putUpdateItem(slot, itemConfig);
             }
-            ItemStack itemStack = createItemStack(itemConfig, player);
-            if (!itemStack.isEmpty()) {
-                menu.setItem(slot, itemStack);
+            ItemStackSnapshot itemStackSnapshot = createItemStack(itemConfig, player);
+            if (!itemStackSnapshot.isEmpty()) {
+                menu.setItem(slot, itemStackSnapshot);
                 // 设置点击事件
                 menu.setAction(slot, clickType -> {
                     if (clickType.equals(ClickTypes.SHIFT_CLICK_LEFT.get())) {
@@ -122,7 +125,7 @@ public class MenuLoader {
     }
 
     // 创建物品堆
-    public static ItemStack createItemStack(MenuConfig.MenuItemConfig config, ServerPlayer player) {
+    public static ItemStackSnapshot createItemStack(MenuConfig.MenuItemConfig config, ServerPlayer player) {
         String materialStr = config.getMaterial();
         if (!materialStr.contains(":")) {
             materialStr = "minecraft:" + materialStr;
@@ -133,12 +136,12 @@ public class MenuLoader {
                 .findValue(itemKey)
                 .orElse(ItemTypes.STONE.get());
 
-        DataContainer container = ItemStack.of(itemType).toContainer();
+        DataContainer container = ItemStack.of(itemType, config.getCount())
+                .toContainer();
 
         // 创建 components 视图
-        DataQuery dataQuery = DataQuery.of("components");
-        DataView dataView = container.createView(dataQuery);
-        DataView view = dataView.createView(DataQuery.of("minecraft:custom_data"));
+        DataView dataView = container.createView(COMPONENTS);
+        DataView view = dataView.createView(CUSTOM_DATA);
 
         // nbtString
         for (Map.Entry<String, String> entry : config.getNbtString().entrySet()) {
@@ -163,7 +166,6 @@ public class MenuLoader {
             String value = Placeholder.parseString(String.valueOf(entry.getValue()), player);
             view.set(DataQuery.of(entry.getKey()), Float.valueOf(value));
         }
-
         // 处理 nbtForm
         if (config.getNbtForm() != null) {
             ConfigurationNode nbtFormNode = config.getNbtForm();
@@ -194,30 +196,28 @@ public class MenuLoader {
                             case Double v -> nbtBuilder.set(propertyKey, v);
                             case Boolean b -> nbtBuilder.set(propertyKey, b);
                             case Long l -> nbtBuilder.set(propertyKey, l.intValue());
+                            case List<?> list -> nbtBuilder.set(propertyKey, list);
                             default -> nbtBuilder.set(propertyKey, rawValue.toString());
                         }
-
                     }
                     nbtBuilder.build(componentView, player);
                 }
             }
         }
-        ItemStack stack = ItemStack.builder()
-                .fromContainer(container)
-                .quantity(config.getCount())
-                .build();
 
-        ItemStack itemStack = updateItemDisplay(config, player, stack);
+        ItemStack itemStack = ItemStack.builder()
+                .fromContainer(container)
+                .build();
 
         // 处理附魔
         if (!config.getEnchantments().isEmpty()) {
             itemStack = applyEnchantmentsToItem(itemStack, config.getEnchantments(), config.isHideEnchantments());
         }
 
-        return itemStack;
+        return itemStack.asImmutable();
     }
 
-    public static ItemStack updateItemDisplay(MenuConfig.MenuItemConfig config, ServerPlayer player, ItemStack stack) {
+    public static ItemStackSnapshot updateItemDisplay(MenuConfig.MenuItemConfig config, ServerPlayer player, ItemStack stack) {
         // 解析显示名称
         String displayName = Placeholder.parseString(config.getDisplayName(), player);
         Component displayComponent = ColorUtils.toComponent(displayName);
@@ -233,7 +233,7 @@ public class MenuLoader {
             List<Component> loreComponents = ColorUtils.toComponentList(Arrays.asList(loreArray));
             stack.offer(Keys.LORE, loreComponents);
         }
-        return stack;
+        return stack.asImmutable();
     }
 
     /**
@@ -480,5 +480,4 @@ public class MenuLoader {
             Lelmenus.instance.logger.error(e.getMessage());
         }
     }
-
 }
