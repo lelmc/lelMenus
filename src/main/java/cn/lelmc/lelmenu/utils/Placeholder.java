@@ -18,9 +18,9 @@ public class Placeholder {
                     player,
                     resolver
             );
-            return PlainTextComponentSerializer.plainText().serialize(parsed);
+            return PlainTextComponentSerializer.plainText().serialize(parsed).toLowerCase();
         } catch (Exception e) {
-            return text;
+            return text.toLowerCase();
         }
     }
 

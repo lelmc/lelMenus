@@ -186,7 +186,7 @@ public class MenuLoader {
                             case null -> {
                             }
                             case String strValue -> {
-                                if (strValue.startsWith("<") && strValue.endsWith(">")) {
+                                if (strValue.contains("<") && strValue.contains(">")) {
                                     nbtBuilder.setPlaceholder(propertyKey, strValue, NbtBuilder.ValueType.AUTO);
                                 } else {
                                     nbtBuilder.set(propertyKey, strValue);
@@ -214,7 +214,7 @@ public class MenuLoader {
             itemStack = applyEnchantmentsToItem(itemStack, config.getEnchantments(), config.isHideEnchantments());
         }
 
-        return itemStack.asImmutable();
+        return updateItemDisplay(config, player, itemStack);
     }
 
     public static ItemStackSnapshot updateItemDisplay(MenuConfig.MenuItemConfig config, ServerPlayer player, ItemStack stack) {

@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "cn.lelmc"
-version = "1.4.3"
+version = "1.4.4"
 
 repositories {
     mavenCentral()
@@ -27,7 +27,7 @@ sponge {
         name(PluginLoaders.JAVA_PLAIN)
         version("1.1")
     }
-    plugin("lelmenus") {
+    plugin("lelmenu") {
         displayName("lelMenus")
         entrypoint("cn.lelmc.lelmenus.Lelmenus")
         description("My plugin description")

@@ -17,7 +17,7 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 import java.nio.file.Path;
 
 
-@Plugin("lelmenus")
+@Plugin("lelmenu")
 public class Lelmenus {
     public static Lelmenus instance;
     public final Logger logger;
